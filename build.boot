@@ -6,9 +6,13 @@
                  [ring/ring-core            "1.5.0"]
                  [ring/ring-jetty-adapter "1.5.0"]])
 
+(set-env!
+  :source-paths #{"compiled/src/"})
+
 (require '[cirru-sepal.core   :refer [transform-cirru]]
          '[adzerk.boot-test   :refer :all]
-         '[clojure.java.io    :as    io])
+         '[clojure.java.io    :as    io]
+         '[stack-server.core  :refer [start-stack-editor! only-println!]])
 
 (def +version+ "0.1.0")
 
@@ -34,6 +38,11 @@
     (watch)
     (transform-cirru)
     (target :dir #{"compiled/"})))
+
+(deftask start-editor! []
+  (comp
+    (start-stack-editor!)
+    (only-println!)))
 
 (deftask build []
   (set-env!

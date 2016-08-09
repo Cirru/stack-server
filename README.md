@@ -10,11 +10,17 @@ TODO
 
 ### Develop
 
-```clojure
-(set-env! :source-paths #{"compiled/src"})
-(require 'stack-server.core)
-(stack-server.core/run-server!)
+```bash
+boot repl
 ```
+
+and in repl:
+
+```clojure
+(boot (start-editor!))
+```
+
+then hit http://localhost:7010/
 
 ### License
 
