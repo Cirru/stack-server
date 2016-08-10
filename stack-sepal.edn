@@ -1,0 +1,1 @@
+{:definitions {"demo.core/main" ["defn" "main" [] ["println" "|main"]]}, :namespaces {"demo.core" ["ns" "demo.core" [":require" ["[]" "clojure.string" ":as" "string"]]]}, :main-definition "demo.core/main", :procedures {"demo.core" ["do" ["println" "1"] ["println" "2"]]}}
