@@ -44,7 +44,7 @@
 
 (deftask start-editor! []
   (comp
-    (start-stack-editor!)
+    (start-stack-editor! :port 7010)
     (wait)
     (target)))
 

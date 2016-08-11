@@ -16,7 +16,7 @@
 
 (deftask
   start-stack-editor!
-  []
+  [p port VAL int "port"]
   (fn [next-handler]
     (fn [fileset]
       (let [file-path "stack-sepal.edn"
@@ -79,5 +79,5 @@
                                        "GET POST"},
                                       :status 404,
                                       :body "not defined."}))]
-        (run-jetty editor-handler {:port 7010, :join? false})
+        (run-jetty editor-handler {:port (or port 7010), :join? false})
         (next-handler (make-result @stack-sepal-ref fileset))))))

@@ -1,6 +1,8 @@
 
 (ns stack-server.analyze
-  (:require [clojure.string :as string] [cirru.sepal :as sepal]))
+  (:require [clojure.string :as string]
+            [cirru.sepal :as sepal]
+            [clansi :refer [style]]))
 
 (defn depends-on? [x y dict level]
   (if (contains? dict x)
@@ -81,7 +83,7 @@
                  [ns-line]
                  declarations
                  definition-lines
-                 [procedure-line]))
+                 procedure-line))
         code (sepal/make-code tree)]
     (comment println "generated file:" code)
     code))
@@ -120,7 +122,7 @@
                                []))]))
           (into {})))
       (do
-        (println "Error: spaces not match!")
-        (println "from definitions:" namespace-names)
-        (println "from namespaces:" namespace-names')
+        (println (style "Error: namespaces not match!" :red))
+        (println "    from definitions:" namespace-names)
+        (println "    from namespaces: " namespace-names')
         {}))))

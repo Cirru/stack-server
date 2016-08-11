@@ -6,21 +6,22 @@ Server side toolchain for stack-editor.
 
 ### Usage
 
-TODO
+```clojure
+[cirru/boot-stack-server]
+```
+
+```clojure
+[stack-server.core :refer [stack-editor!]]
+
+(comp
+  (stack-editor! :port 7010))
+```
 
 ### Develop
 
 ```bash
-boot repl
+boot start-editor!
 ```
-
-and in repl:
-
-```clojure
-(boot (start-editor!))
-```
-
-then hit http://localhost:7010/
 
 ### License
 
