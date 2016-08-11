@@ -3,11 +3,16 @@
   (:require [ring.adapter.jetty :refer [run-jetty]]
             [boot.core :refer :all]
             [ring.middleware.cors :refer [wrap-cors]]
-            [stack-server.analyze :refer [collect-files]]))
+            [stack-server.analyze :refer [collect-files]]
+            [clojure.java.io :as io]))
 
 (defn make-result [collection fileset]
-  (collect-files collection)
-  fileset)
+  (let [file-dict (collect-files collection) tmp (tmp-dir!)]
+    (doseq [entry file-dict]
+      (let [file-path (io/file tmp (str (key entry) ".cljs"))]
+        (io/make-parents file-path)
+        (spit file-path (val entry))))
+    (-> fileset (add-resource tmp) (commit!))))
 
 (deftask
   start-stack-editor!

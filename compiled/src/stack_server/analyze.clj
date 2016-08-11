@@ -14,6 +14,11 @@
             deps))))
     false))
 
+(defn ns->path [namespace-name]
+  (-> namespace-name
+   (string/replace (re-pattern "\\.") "/")
+   (string/replace (re-pattern "-") "_")))
+
 (defn strip-atom [token]
   (if (= (first token) "@") (subs token 1) token))
 
@@ -76,20 +81,13 @@
                  [ns-line]
                  declarations
                  definition-lines
-                 [procedure-line]))]
-    (println "definitions:")
-    (println definitions)
-    (println (sepal/make-code tree)))
-  "file....")
+                 [procedure-line]))
+        code (sepal/make-code tree)]
+    (comment println "generated file:" code)
+    code))
 
 (defn collect-files [collection]
   (let [namespace-names (keys (:namespaces collection))
-        file-names (map
-                     (fn [namespace-name]
-                       (-> namespace-name
-                        (string/replace (re-pattern "\\.") "/")
-                        (string/replace (re-pattern "-") "_")))
-                     namespace-names)
         namespace-names' (distinct
                            (map
                              (fn [definition-name]
@@ -103,18 +101,24 @@
         (->>
           namespace-names
           (map
-            (fn [ns-name]
-              (generate-file
-                (get-in collection [:namespaces ns-name])
-                (->>
-                  (:definitions collection)
-                  (filter
-                    (fn [entry]
-                      (string/starts-with?
-                        (key entry)
-                        (str ns-name "/"))))
-                  (into {}))
-                (or (get-in collection [:procedures ns-name]) []))))))
+            (fn [ns-name] [(ns->path ns-name)
+                           (generate-file
+                             (get-in collection [:namespaces ns-name])
+                             (->>
+                               (:definitions collection)
+                               (filter
+                                 (fn 
+                                   [entry]
+                                   (string/starts-with?
+                                     (key entry)
+                                     (str ns-name "/"))))
+                               (into {}))
+                             (or
+                               (get-in
+                                 collection
+                                 [:procedures ns-name])
+                               []))]))
+          (into {})))
       (do
         (println "Error: spaces not match!")
         (println "from definitions:" namespace-names)

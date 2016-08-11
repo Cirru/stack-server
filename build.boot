@@ -44,7 +44,9 @@
 
 (deftask start-editor! []
   (comp
-    (start-stack-editor!)))
+    (start-stack-editor!)
+    (wait)
+    (target)))
 
 (deftask build []
   (set-env!
