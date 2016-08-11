@@ -6,17 +6,21 @@
             [stack-server.analyze :refer [collect-files]]
             [clojure.java.io :as io]))
 
-(defn make-result [collection fileset]
+(defn make-result [collection fileset extname]
   (let [file-dict (collect-files collection) tmp (tmp-dir!)]
     (doseq [entry file-dict]
-      (let [file-path (io/file tmp (str (key entry) ".cljs"))]
+      (let [file-path (io/file
+                        tmp
+                        (str
+                          (key entry)
+                          (if (some? extname) extname ".cljs")))]
         (io/make-parents file-path)
         (spit file-path (val entry))))
     (-> fileset (add-resource tmp) (commit!))))
 
 (deftask
   start-stack-editor!
-  [p port VAL int "port"]
+  [p port int "port" e extname VAL str "extension name"]
   (fn [next-handler]
     (fn [fileset]
       (let [file-path "stack-sepal.edn"
@@ -50,7 +54,8 @@
                                                                      (next-handler
                                                                        (make-result
                                                                          @stack-sepal-ref
-                                                                         fileset))
+                                                                         fileset
+                                                                         extname))
                                                                      (spit
                                                                        file-path
                                                                        new-content)
@@ -80,4 +85,5 @@
                                       :status 404,
                                       :body "not defined."}))]
         (run-jetty editor-handler {:port (or port 7010), :join? false})
-        (next-handler (make-result @stack-sepal-ref fileset))))))
+        (next-handler
+          (make-result @stack-sepal-ref fileset extname))))))

@@ -44,7 +44,7 @@
 
 (deftask start-editor! []
   (comp
-    (start-stack-editor! :port 7010)
+    (start-stack-editor! :port 7010 :extname ".cljs")
     (wait)
     (target)))
 
