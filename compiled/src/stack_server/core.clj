@@ -76,9 +76,3 @@
                                       :body "not defined."}))]
         (run-jetty editor-handler {:port 7010, :join? false})
         (next-handler (make-result @stack-sepal-ref fileset))))))
-
-(deftask
-  only-println!
-  []
-  (fn [next-handler]
-    (fn [fileset] (println "only print...") (next-handler fileset))))

@@ -7,8 +7,24 @@
                     (fn [var-name]
                       (last (string/split var-name (re-pattern "/"))))
                     (keys definitions))
+        referred-names (->>
+                         (vals definitions)
+                         (map (fn [tree] (subvec tree 2)))
+                         (flatten)
+                         (distinct)
+                         (map
+                           (fn [token]
+                             (if (= (first token) "@")
+                               (subs token 1)
+                               token)))
+                         (filter
+                           (fn [token]
+                             (println "filtering:" token var-names)
+                             (contains?
+                               (into (hash-set) var-names)
+                               token))))
         declarations (->>
-                       var-names
+                       referred-names
                        (map (fn [var-name] ["declare" var-name]))
                        (into []))
         definition-lines (map last definitions)
@@ -19,7 +35,9 @@
                  declarations
                  definition-lines
                  [procedure-line]))]
-    (println "tree" (sepal/make-code tree)))
+    (println "definitions:")
+    (println definitions)
+    (println (sepal/make-code tree)))
   "file....")
 
 (defn collect-files [collection]
@@ -50,7 +68,6 @@
                   (:definitions collection)
                   (filter
                     (fn [entry]
-                      (println "entry" entry ns-name)
                       (string/starts-with?
                         (key entry)
                         (str ns-name "/"))))
