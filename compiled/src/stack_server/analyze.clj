@@ -1,9 +1,25 @@
 
 (ns stack-server.analyze
-  (:require [clojure.string :as string]))
+  (:require [clojure.string :as string] [cirru.sepal :as sepal]))
 
-(defn generate-file [informations]
-  (println "informations" informations)
+(defn generate-file [ns-line definitions procedure-line]
+  (let [var-names (map
+                    (fn [var-name]
+                      (last (string/split var-name (re-pattern "/"))))
+                    (keys definitions))
+        declarations (->>
+                       var-names
+                       (map (fn [var-name] ["declare" var-name]))
+                       (into []))
+        definition-lines (map last definitions)
+        tree (into
+               []
+               (concat
+                 [ns-line]
+                 declarations
+                 definition-lines
+                 [procedure-line]))]
+    (println "tree" (sepal/make-code tree)))
   "file....")
 
 (defn collect-files [collection]
@@ -24,23 +40,22 @@
                              (keys (:definitions collection))))]
     (if (= (sort namespace-names) (sort namespace-names'))
       (doall
-        (map
-          (fn [ns-name]
-            (println "loop ns-name")
-            (generate-file
-              {:definitions
-               (into
-                 {}
-                 (filter
-                   (fn [entry]
-                     (string/starts-with?
-                       (first entry)
-                       (str ns-name "/")))
-                   (:definitions collection))),
-               :procedure
-               (or (get-in collection [:procedures ns-name]) []),
-               :namespace (get-in collection [:namespaces ns-name])}))
-          namespace-names))
+        (->>
+          namespace-names
+          (map
+            (fn [ns-name]
+              (generate-file
+                (get-in collection [:namespaces ns-name])
+                (->>
+                  (:definitions collection)
+                  (filter
+                    (fn [entry]
+                      (println "entry" entry ns-name)
+                      (string/starts-with?
+                        (key entry)
+                        (str ns-name "/"))))
+                  (into {}))
+                (or (get-in collection [:procedures ns-name]) []))))))
       (do
         (println "Error: spaces not match!")
         (println "from definitions:" namespace-names)

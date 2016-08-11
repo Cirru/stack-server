@@ -5,7 +5,9 @@
                  [adzerk/boot-test          "1.1.2"       :scope "test"]
                  [ring/ring-core            "1.5.0"]
                  [ring/ring-jetty-adapter   "1.5.0"]
-                 [ring-cors                 "0.1.8"]])
+                 [ring-cors                 "0.1.8"]
+                 [cirru/sepal               "0.0.11"]
+                 [clansi                    "1.0.0"]])
 
 (set-env!
   :source-paths #{"compiled/src/"})
