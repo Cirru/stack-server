@@ -2,32 +2,74 @@
 (ns stack-server.analyze
   (:require [clojure.string :as string] [cirru.sepal :as sepal]))
 
+(defn depends-on? [x y dict level]
+  (if (contains? dict x)
+    (let [deps (get dict x)]
+      (if (contains? deps y)
+        true
+        (if (> level 3)
+          false
+          (some
+            (fn [child] (depends-on? child y dict (inc level)))
+            deps))))
+    false))
+
+(defn strip-atom [token]
+  (if (= (first token) "@") (subs token 1) token))
+
 (defn generate-file [ns-line definitions procedure-line]
-  (let [var-names (map
-                    (fn [var-name]
-                      (last (string/split var-name (re-pattern "/"))))
-                    (keys definitions))
-        referred-names (->>
-                         (vals definitions)
-                         (map (fn [tree] (subvec tree 2)))
-                         (flatten)
-                         (distinct)
-                         (map
-                           (fn [token]
-                             (if (= (first token) "@")
-                               (subs token 1)
-                               token)))
-                         (filter
-                           (fn [token]
-                             (println "filtering:" token var-names)
-                             (contains?
-                               (into (hash-set) var-names)
-                               token))))
+  (let [ns-name (get ns-line 1)
+        var-names (->>
+                    (keys definitions)
+                    (map
+                      (fn [var-name]
+                        (last
+                          (string/split var-name (re-pattern "/")))))
+                    (into (hash-set)))
+        deps-info (->>
+                    definitions
+                    (map
+                      (fn [entry]
+                        (let [path (key entry)
+                              tree (val entry)
+                              var-name (last
+                                         (string/split
+                                           path
+                                           (re-pattern "/")))
+                              dep-tokens (->>
+                                           (subvec tree 2)
+                                           (flatten)
+                                           (distinct)
+                                           (map strip-atom)
+                                           (filter
+                                             (fn 
+                                               [token]
+                                               (contains?
+                                                 var-names
+                                                 token)))
+                                           (into (hash-set)))]
+                          [var-name dep-tokens])))
+                    (into {}))
+        self-deps-names (filter
+                          (fn [x] (depends-on? x x deps-info 0))
+                          var-names)
+        sorted-names (sort
+                       (fn [x y]
+                         (cond
+                           (depends-on? x y deps-info 0) 1
+                           (depends-on? y x deps-info 0) -1
+                           :else 0))
+                       var-names)
         declarations (->>
-                       referred-names
+                       self-deps-names
                        (map (fn [var-name] ["declare" var-name]))
                        (into []))
-        definition-lines (map last definitions)
+        definition-lines (map
+                           (fn [var-name]
+                             (get
+                               definitions
+                               (str ns-name "/" var-name)))
+                           sorted-names)
         tree (into
                []
                (concat
