@@ -39,75 +39,44 @@
       (let [file-path (or filename "stack-sepal.ir")
             stack-sepal-ref (atom (read-string (slurp file-path)))
             editor-handler (fn [request]
-                             (cond
-                               (= (:request-method request) :get) {:headers
-                                                                   {"Access-Control-Allow-Origin"
-                                                                    (get-in
-                                                                      request
-                                                                      [:headers
-                                                                       "origin"]),
-                                                                    "Content-Type"
-                                                                    "text/edn",
-                                                                    "Access-Control-Allow-Methods"
-                                                                    "GET POST"},
-                                                                   :status
-                                                                   200,
-                                                                   :body
-                                                                   (pr-str
-                                                                     @stack-sepal-ref)}
-                               (= (:request-method request) :post) (let 
-                                                                     [new-content
-                                                                      (slurp
-                                                                        (:body
-                                                                          request))
-                                                                      result
-                                                                      (make-result
-                                                                        @stack-sepal-ref
-                                                                        fileset
-                                                                        extname)]
-                                                                     (reset!
-                                                                       stack-sepal-ref
-                                                                       (read-string
-                                                                         new-content))
-                                                                     (comment
-                                                                       println
-                                                                       "writing file:"
-                                                                       file-path
-                                                                       new-content)
-                                                                     (spit
-                                                                       file-path
-                                                                       new-content)
-                                                                     (comment
-                                                                       println
-                                                                       "result:"
-                                                                       result)
-                                                                     (next-handler
-                                                                       result)
-                                                                     {:headers
-                                                                      {"Access-Control-Allow-Origin"
-                                                                       (get-in
-                                                                         request
-                                                                         [:headers
-                                                                          "origin"]),
-                                                                       "Content-Type"
-                                                                       "text/edn",
-                                                                       "Access-Control-Allow-Methods"
-                                                                       "GET POST"},
-                                                                      :status
-                                                                      200,
-                                                                      :body
-                                                                      (pr-str
-                                                                        @stack-sepal-ref)})
-                               :else {:headers
-                                      {"Access-Control-Allow-Origin"
-                                       (get-in
-                                         request
-                                         [:headers "origin"]),
-                                       "Content-Type" "text/plain",
-                                       "Access-Control-Allow-Methods"
-                                       "GET POST"},
-                                      :status 404,
-                                      :body "not defined."}))]
+                             (let [cors-headers
+                                   {"Access-Control-Allow-Origin"
+                                    (get-in
+                                      request
+                                      [:headers "origin"]),
+                                    "Content-Type" "text/edn",
+                                    "Access-Control-Allow-Methods"
+                                    "GET POST"}]
+                               (cond
+                                 (= (:request-method request) :get)
+                                 {:headers (merge cors-headers),
+                                  :status 200,
+                                  :body (pr-str @stack-sepal-ref)}
+                                 (= (:request-method request) :post)
+                                 (let 
+                                   [new-content (slurp (:body request))
+                                    result
+                                    (make-result
+                                      @stack-sepal-ref
+                                      fileset
+                                      extname)]
+                                   (reset!
+                                     stack-sepal-ref
+                                     (read-string new-content))
+                                   (comment
+                                     println
+                                     "writing file:"
+                                     file-path
+                                     new-content)
+                                   (spit file-path new-content)
+                                   (next-handler result)
+                                   {:headers (merge cors-headers),
+                                    :status 200,
+                                    :body (pr-str {:status "ok"})})
+                                 :else
+                                 {:headers (merge cors-headers),
+                                  :status 404,
+                                  :body (pr-str {:status "ok"})})))]
         (run-jetty editor-handler {:port (or port 7010), :join? false})
         (next-handler
           (make-result @stack-sepal-ref fileset extname))))))
