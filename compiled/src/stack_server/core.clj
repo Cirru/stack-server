@@ -55,14 +55,14 @@
                                  (= (:request-method request) :post)
                                  (let 
                                    [new-content (slurp (:body request))
+                                    sepal-data
+                                    (read-string new-content)
                                     result
                                     (make-result
-                                      @stack-sepal-ref
+                                      sepal-data
                                       fileset
                                       extname)]
-                                   (reset!
-                                     stack-sepal-ref
-                                     (read-string new-content))
+                                   (reset! stack-sepal-ref sepal-data)
                                    (comment
                                      println
                                      "writing file:"

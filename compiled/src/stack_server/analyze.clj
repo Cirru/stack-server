@@ -22,7 +22,7 @@
    (string/replace (re-pattern "-") "_")))
 
 (defn strip-atom [token]
-  (if (= (first token) "@") (subs token 1) token))
+  (if (string/starts-with? token "@") (subs token 1) token))
 
 (defn generate-file [ns-line definitions procedure-line]
   (let [ns-name (get ns-line 1)
