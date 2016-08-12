@@ -17,7 +17,7 @@
          '[clojure.java.io    :as    io]
          '[stack-server.core  :refer [start-stack-editor!]])
 
-(def +version+ "0.1.0")
+(def +version+ "0.1.1")
 
 (task-options!
   pom {:project     'cirru/stack-server

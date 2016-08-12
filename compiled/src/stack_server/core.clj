@@ -23,7 +23,7 @@
   [p port int "port" e extname VAL str "extension name"]
   (fn [next-handler]
     (fn [fileset]
-      (let [file-path "stack-sepal.edn"
+      (let [file-path "stack-sepal.ir"
             stack-sepal-ref (atom (read-string (slurp file-path)))
             editor-handler (fn [request]
                              (cond
@@ -46,19 +46,30 @@
                                                                      [new-content
                                                                       (slurp
                                                                         (:body
-                                                                          request))]
+                                                                          request))
+                                                                      result
+                                                                      (make-result
+                                                                        @stack-sepal-ref
+                                                                        fileset
+                                                                        extname)]
                                                                      (reset!
                                                                        stack-sepal-ref
                                                                        (read-string
                                                                          new-content))
-                                                                     (next-handler
-                                                                       (make-result
-                                                                         @stack-sepal-ref
-                                                                         fileset
-                                                                         extname))
+                                                                     (comment
+                                                                       println
+                                                                       "writing file:"
+                                                                       file-path
+                                                                       new-content)
                                                                      (spit
                                                                        file-path
                                                                        new-content)
+                                                                     (comment
+                                                                       println
+                                                                       "result:"
+                                                                       result)
+                                                                     (next-handler
+                                                                       result)
                                                                      {:headers
                                                                       {"Access-Control-Allow-Origin"
                                                                        (get-in
