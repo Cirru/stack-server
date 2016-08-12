@@ -20,10 +20,23 @@
 
 (deftask
   start-stack-editor!
-  [p port int "port" e extname VAL str "extension name"]
+  [p
+   port
+   int
+   "Port"
+   e
+   extname
+   VAL
+   str
+   "Extname"
+   f
+   filename
+   VAL
+   str
+   "Filename"]
   (fn [next-handler]
     (fn [fileset]
-      (let [file-path "stack-sepal.ir"
+      (let [file-path (or filename "stack-sepal.ir")
             stack-sepal-ref (atom (read-string (slurp file-path)))
             editor-handler (fn [request]
                              (cond

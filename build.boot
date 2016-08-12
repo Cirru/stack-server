@@ -17,7 +17,7 @@
          '[clojure.java.io    :as    io]
          '[stack-server.core  :refer [start-stack-editor!]])
 
-(def +version+ "0.1.1")
+(def +version+ "0.1.2")
 
 (task-options!
   pom {:project     'cirru/stack-server
@@ -44,7 +44,7 @@
 
 (deftask start-editor! []
   (comp
-    (start-stack-editor! :port 7010 :extname ".cljs")
+    (start-stack-editor! :port 7010 :extname ".cljs" :filename "stack-sepal.ir")
     (wait)
     (target)))
 
