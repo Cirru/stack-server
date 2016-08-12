@@ -80,3 +80,12 @@
         (run-jetty editor-handler {:port (or port 7010), :join? false})
         (next-handler
           (make-result @stack-sepal-ref fileset extname))))))
+
+(deftask
+  transform-stack
+  [e extname VAL str "Extname" f filename VAL str "Filename"]
+  (fn [next-handler]
+    (fn [fileset]
+      (let [file-path (or filename "stack-sepal.ir")
+            stack-sepal (read-string (slurp file-path))]
+        (next-handler (make-result stack-sepal fileset extname))))))

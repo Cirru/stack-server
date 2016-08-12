@@ -15,9 +15,9 @@
 (require '[cirru-sepal.core   :refer [transform-cirru]]
          '[adzerk.boot-test   :refer :all]
          '[clojure.java.io    :as    io]
-         '[stack-server.core  :refer [start-stack-editor!]])
+         '[stack-server.core  :refer [start-stack-editor! transform-stack]])
 
-(def +version+ "0.1.3")
+(def +version+ "0.1.4")
 
 (task-options!
   pom {:project     'cirru/stack-server
@@ -31,7 +31,7 @@
   (set-env!
     :source-paths #{"cirru/"})
   (comp
-    (transform-cirru)
+    (transform-stack)
     (target :dir #{"compiled/"})))
 
 (deftask watch-compile []
@@ -45,6 +45,11 @@
 (deftask start-editor! []
   (comp
     (start-stack-editor! :port 7010 :extname ".cljs" :filename "stack-sepal.ir")
+    (target)))
+
+(deftask compile-stack []
+  (comp
+    (transform-stack)
     (target)))
 
 (deftask build []
