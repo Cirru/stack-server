@@ -69,7 +69,9 @@
                                      file-path
                                      new-content)
                                    (spit file-path new-content)
-                                   (next-handler result)
+                                   (binding 
+                                     [*warnings* (atom 0)]
+                                     (next-handler result))
                                    {:headers (merge cors-headers),
                                     :status 200,
                                     :body (pr-str {:status "ok"})})
