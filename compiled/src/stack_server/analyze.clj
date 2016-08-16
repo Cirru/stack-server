@@ -51,9 +51,11 @@
                                            (filter
                                              (fn 
                                                [token]
-                                               (contains?
-                                                 var-names
-                                                 token)))
+                                               (and
+                                                 (not= token var-name)
+                                                 (contains?
+                                                   var-names
+                                                   token))))
                                            (into (hash-set)))]
                           [var-name dep-tokens])))
                     (into {}))
