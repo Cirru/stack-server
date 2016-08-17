@@ -67,7 +67,10 @@
                          (cond
                            (depends-on? x y deps-info 0) 1
                            (depends-on? y x deps-info 0) -1
-                           :else 0))
+                           :else (let 
+                                   [xc (count (get deps-info x))
+                                    yc (count (get deps-info y))]
+                                   (compare xc yc))))
                        var-names)
         declarations (->>
                        self-deps-names

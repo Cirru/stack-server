@@ -17,7 +17,7 @@
          '[clojure.java.io    :as    io]
          '[stack-server.core  :refer [start-stack-editor! transform-stack]])
 
-(def +version+ "0.1.7")
+(def +version+ "0.1.8")
 
 (task-options!
   pom {:project     'cirru/stack-server
