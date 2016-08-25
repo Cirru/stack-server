@@ -44,7 +44,8 @@
                                     (get-in
                                       request
                                       [:headers "origin"]),
-                                    "Content-Type" "text/edn",
+                                    "Content-Type"
+                                    "text/edn; charset=UTF-8",
                                     "Access-Control-Allow-Methods"
                                     "GET POST"}]
                                (cond
