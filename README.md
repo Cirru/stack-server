@@ -9,7 +9,7 @@ Server side toolchain for stack-editor.
 [![Clojars Project](https://img.shields.io/clojars/v/cirru/stack-server.svg)](https://clojars.org/cirru/stack-server)
 
 ```clojure
-[cirru/stack-server "0.1.9"]
+[cirru/stack-server "0.1.10"]
 ```
 
 ```clojure

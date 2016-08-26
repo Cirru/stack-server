@@ -9,7 +9,7 @@
     (let [deps (get dict x)]
       (if (contains? deps y)
         true
-        (if (> level 3)
+        (if (> level 4)
           false
           (some
             (fn [child] (depends-on? child y dict (inc level)))
@@ -23,6 +23,21 @@
 
 (defn strip-atom [token]
   (if (string/starts-with? token "@") (subs token 1) token))
+
+(defn deps-insert [acc new-item items deps-info]
+  (if (empty? items)
+    (conj acc new-item)
+    (let [cursor (first items)]
+      (if (depends-on? cursor new-item deps-info 0)
+        (into [] (concat acc [new-item] items))
+        (recur (conj acc cursor) new-item (rest items) deps-info)))))
+
+(defn deps-sort [acc items deps-info]
+  (if (empty? items)
+    acc
+    (let [cursor (first items)
+          next-acc (deps-insert [] cursor acc deps-info)]
+      (recur next-acc (into [] (rest items)) deps-info))))
 
 (defn generate-file [ns-line definitions procedure-line]
   (let [ns-name (get ns-line 1)
@@ -62,16 +77,7 @@
         self-deps-names (filter
                           (fn [x] (depends-on? x x deps-info 0))
                           var-names)
-        sorted-names (sort
-                       (fn [x y]
-                         (cond
-                           (depends-on? x y deps-info 0) 1
-                           (depends-on? y x deps-info 0) -1
-                           :else (let 
-                                   [xc (count (get deps-info x))
-                                    yc (count (get deps-info y))]
-                                   (compare xc yc))))
-                       var-names)
+        sorted-names (deps-sort [] (into [] var-names) deps-info)
         declarations (->>
                        self-deps-names
                        (map (fn [var-name] ["declare" var-name]))
@@ -90,6 +96,8 @@
                  definition-lines
                  procedure-line))
         code (sepal/make-code tree)]
+    (comment println "before sort:" var-names)
+    (comment println "after  sort:" sorted-names)
     (comment println "generated file:" code)
     code))
 
