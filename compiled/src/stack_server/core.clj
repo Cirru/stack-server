@@ -4,7 +4,8 @@
             [boot.core :refer :all]
             [ring.middleware.cors :refer [wrap-cors]]
             [stack-server.analyze :refer [collect-files]]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [shallow-diff.patch :refer [patch]]))
 
 (defn make-result [collection fileset extname]
   (let [file-dict (collect-files collection) tmp (tmp-dir!)]
@@ -47,7 +48,7 @@
                                     "Content-Type"
                                     "text/edn; charset=UTF-8",
                                     "Access-Control-Allow-Methods"
-                                    "GET POST"}]
+                                    "GET, POST, PATCH, OPTIONS"}]
                                (cond
                                  (= (:request-method request) :get)
                                  {:headers (merge cors-headers),
@@ -76,6 +77,40 @@
                                    {:headers (merge cors-headers),
                                     :status 200,
                                     :body (pr-str {:status "ok"})})
+                                 (= (:request-method request) :patch)
+                                 (let 
+                                   [changes-content
+                                    (slurp (:body request))
+                                    changes
+                                    (read-string changes-content)
+                                    new-sepal-data
+                                    (patch @stack-sepal-ref changes)
+                                    result
+                                    (make-result
+                                      new-sepal-data
+                                      fileset
+                                      extname)]
+                                   (reset!
+                                     stack-sepal-ref
+                                     new-sepal-data)
+                                   (comment
+                                     println
+                                     "writing file:"
+                                     file-path
+                                     new-content)
+                                   (spit
+                                     file-path
+                                     (pr-str new-sepal-data))
+                                   (binding 
+                                     [*warnings* (atom 0)]
+                                     (next-handler result))
+                                   {:headers (merge cors-headers),
+                                    :status 200,
+                                    :body (pr-str {:status "ok"})})
+                                 (= (:request-method request) :options)
+                                 {:headers (merge cors-headers),
+                                  :status 200,
+                                  :body "ok"}
                                  :else
                                  {:headers (merge cors-headers),
                                   :status 404,

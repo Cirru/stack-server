@@ -7,6 +7,7 @@
                  [ring/ring-jetty-adapter   "1.5.0"]
                  [ring-cors                 "0.1.8"]
                  [cirru/sepal               "0.0.11"]
+                 [cumulo/shallow-diff       "0.1.1"]
                  [clansi                    "1.0.0"]])
 
 (set-env!
@@ -17,7 +18,7 @@
          '[clojure.java.io    :as    io]
          '[stack-server.core  :refer [start-stack-editor! transform-stack]])
 
-(def +version+ "0.1.10")
+(def +version+ "0.1.11")
 
 (task-options!
   pom {:project     'cirru/stack-server
