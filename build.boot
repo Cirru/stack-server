@@ -6,7 +6,7 @@
                  [ring/ring-core            "1.5.0"]
                  [ring/ring-jetty-adapter   "1.5.0"]
                  [ring-cors                 "0.1.8"]
-                 [cirru/sepal               "0.0.11"]
+                 [cirru/sepal               "0.0.12"]
                  [cumulo/shallow-diff       "0.1.1"]
                  [clansi                    "1.0.0"]])
 
@@ -18,10 +18,10 @@
          '[clojure.java.io    :as    io]
          '[stack-server.core  :refer [start-stack-editor! transform-stack]])
 
-(def +version+ "0.1.11")
+(def +version+ "0.1.12")
 
 (task-options!
-  pom {:project     'cirru/stack-server
+  pom {:project     'cirru/boot-stack-server
        :version     +version+
        :description "Server side toolchain for stack-editor"
        :url         "https://github.com/Cirru/boot-stack-server"
@@ -45,6 +45,7 @@
 
 (deftask start-editor! []
   (comp
+    (repl)
     (start-stack-editor! :port 7010 :extname ".cljs" :filename "stack-sepal.ir")
     (target)))
 
