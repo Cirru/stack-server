@@ -6,7 +6,7 @@
 
 (defn depends-on? [x y dict level]
   (if (contains? dict x)
-    (let [deps (get dict x)]
+    (let [deps (:tokens (get dict x))]
       (if (contains? deps y)
         true
         (if (> level 4)
@@ -24,12 +24,18 @@
 (defn strip-atom [token]
   (if (string/starts-with? token "@") (subs token 1) token))
 
+(def def-names #{"defonce" "def"})
+
 (defn deps-insert [acc new-item items deps-info]
   (if (empty? items)
     (conj acc new-item)
     (let [cursor (first items)]
       (if (depends-on? cursor new-item deps-info 0)
-        (into [] (concat acc [new-item] items))
+        (if (depends-on? new-item cursor deps-info 0)
+          (if (contains? def-names (:kind (get deps-info new-item)))
+            (recur (conj acc cursor) new-item (rest items) deps-info)
+            (into [] (concat acc [new-item] items)))
+          (into [] (concat acc [new-item] items)))
         (recur (conj acc cursor) new-item (rest items) deps-info)))))
 
 (defn deps-sort [acc items deps-info]
@@ -72,7 +78,8 @@
                                                    var-names
                                                    token))))
                                            (into (hash-set)))]
-                          [var-name dep-tokens])))
+                          [var-name
+                           {:kind (first tree), :tokens dep-tokens}])))
                     (into {}))
         self-deps-names (filter
                           (fn [x] (depends-on? x x deps-info 0))
