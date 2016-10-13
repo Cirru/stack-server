@@ -70,10 +70,10 @@
                                      "writing file:"
                                      file-path
                                      new-content)
-                                   (spit file-path new-content)
                                    (binding 
                                      [*warnings* (atom 0)]
                                      (next-handler result))
+                                   (spit file-path new-content)
                                    {:headers (merge cors-headers),
                                     :status 200,
                                     :body (pr-str {:status "ok"})})
@@ -98,12 +98,12 @@
                                      "writing file:"
                                      file-path
                                      new-content)
-                                   (spit
-                                     file-path
-                                     (pr-str new-sepal-data))
                                    (binding 
                                      [*warnings* (atom 0)]
                                      (next-handler result))
+                                   (spit
+                                     file-path
+                                     (pr-str new-sepal-data))
                                    {:headers (merge cors-headers),
                                     :status 200,
                                     :body (pr-str {:status "ok"})})
