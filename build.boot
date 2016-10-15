@@ -4,7 +4,7 @@
   :dependencies '[[org.clojure/clojure       "1.8.0"       :scope "test"]
                   [org.clojure/clojurescript "1.9.216"     :scope "test"]
                   [adzerk/boot-test          "1.1.2"       :scope "test"]
-                  [clansi                    "1.0.0"       :scope "test"]
+                  [clansi                    "1.0.0"]
                   [ring/ring-core            "1.5.0"]
                   [ring/ring-jetty-adapter   "1.5.0"]
                   [ring-cors                 "0.1.8"]
@@ -15,7 +15,7 @@
          '[clojure.java.io    :as    io]
          '[stack-server.core  :refer [start-stack-editor! transform-stack]])
 
-(def +version+ "0.1.15")
+(def +version+ "0.1.16")
 
 (task-options!
   pom {:project     'cirru/boot-stack-server
@@ -44,7 +44,7 @@
 
 (deftask build []
   (comp
-    (transform-stack :filename "stack-sepal.ir")
+    (transform-stack :extname ".clj" :filename "stack-sepal.ir")
     (pom)
     (jar)
     (install)
