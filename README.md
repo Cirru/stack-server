@@ -25,7 +25,8 @@ Server side toolchain for stack-editor.
 ### Develop
 
 ```bash
-boot start-editor!
+boot dev! # compiles to `src/`
+boot demo! # compiles to `example/src/`
 ```
 
 ### License

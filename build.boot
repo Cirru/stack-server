@@ -1,20 +1,17 @@
 
 (set-env!
- :dependencies '[[org.clojure/clojure       "1.8.0"       :scope "test"]
-                 [cirru/boot-cirru-sepal    "0.1.9"       :scope "test"]
-                 [adzerk/boot-test          "1.1.2"       :scope "test"]
-                 [ring/ring-core            "1.5.0"]
-                 [ring/ring-jetty-adapter   "1.5.0"]
-                 [ring-cors                 "0.1.8"]
-                 [cirru/sepal               "0.0.12"]
-                 [cumulo/shallow-diff       "0.1.1"]
-                 [clansi                    "1.0.0"]])
+  :source-paths #{"src/"}
+  :dependencies '[[org.clojure/clojure       "1.8.0"       :scope "test"]
+                  [org.clojure/clojurescript "1.9.216"     :scope "test"]
+                  [adzerk/boot-test          "1.1.2"       :scope "test"]
+                  [clansi                    "1.0.0"       :scope "test"]
+                  [ring/ring-core            "1.5.0"]
+                  [ring/ring-jetty-adapter   "1.5.0"]
+                  [ring-cors                 "0.1.8"]
+                  [cirru/sepal               "0.0.12"]
+                  [cumulo/shallow-diff       "0.1.1"]])
 
-(set-env!
-  :source-paths #{"compiled/src/"})
-
-(require '[cirru-sepal.core   :refer [transform-cirru]]
-         '[adzerk.boot-test   :refer :all]
+(require '[adzerk.boot-test   :refer :all]
          '[clojure.java.io    :as    io]
          '[stack-server.core  :refer [start-stack-editor! transform-stack]])
 
@@ -28,37 +25,26 @@
        :scm         {:url "https://github.com/Cirru/boot-stack-server"}
        :license     {"MIT" "http://opensource.org/licenses/mit-license.php"}})
 
-(deftask compile-cirru []
-  (set-env!
-    :source-paths #{"cirru/"})
-  (comp
-    (transform-cirru)
-    (target :dir #{"compiled/"})))
-
-(deftask watch-compile []
-  (set-env!
-    :source-paths #{"cirru/"})
-  (comp
-    (watch)
-    (transform-cirru)
-    (target :dir #{"compiled/"})))
-
-(deftask start-editor! []
+(deftask dev! []
   (comp
     (repl)
-    (start-stack-editor! :port 7010 :extname ".cljs" :filename "stack-sepal.ir")
-    (target)))
+    (start-stack-editor! :port 7010 :extname ".clj" :filename "stack-sepal.ir")
+    (target :dir #{"src/"})))
 
-(deftask compile-stack []
+(deftask demo! []
   (comp
-    (transform-stack)
-    (target)))
+    (repl)
+    (start-stack-editor! :port 7011 :extname ".clj" :filename "example/stack-sepal.ir")
+    (target :dir #{"example/src/"})))
+
+(deftask generate-code []
+  (comp
+    (transform-stack :port 7010 :extname ".clj" :filename "stack-sepal.ir")
+    (target :dir #{"src/"})))
 
 (deftask build []
-  (set-env!
-    :source-paths #{"cirru/src"})
   (comp
-    (transform-cirru)
+    (transform-stack :filename "stack-sepal.ir")
     (pom)
     (jar)
     (install)
@@ -73,8 +59,7 @@
 
 (deftask watch-test []
   (set-env!
-    :source-paths #{"cirru/src" "cirru/test"})
+    :source-paths #{"src" "test"})
   (comp
     (watch)
-    (transform-cirru)
     (test :namespaces '#{stack-server.test})))

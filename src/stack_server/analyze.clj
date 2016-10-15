@@ -16,14 +16,6 @@
             deps))))
     false))
 
-(defn ns->path [namespace-name]
-  (-> namespace-name
-   (string/replace (re-pattern "\\.") "/")
-   (string/replace (re-pattern "-") "_")))
-
-(defn strip-atom [token]
-  (if (string/starts-with? token "@") (subs token 1) token))
-
 (def def-names #{"defonce" "def"})
 
 (defn deps-insert [acc new-item items deps-info]
@@ -37,6 +29,14 @@
             (into [] (concat acc [new-item] items)))
           (into [] (concat acc [new-item] items)))
         (recur (conj acc cursor) new-item (rest items) deps-info)))))
+
+(defn ns->path [namespace-name]
+  (-> namespace-name
+   (string/replace (re-pattern "\\.") "/")
+   (string/replace (re-pattern "-") "_")))
+
+(defn strip-atom [token]
+  (if (string/starts-with? token "@") (subs token 1) token))
 
 (defn deps-sort [acc items deps-info]
   (if (empty? items)
@@ -109,16 +109,21 @@
     code))
 
 (defn collect-files [collection]
-  (let [namespace-names (keys (:namespaces collection))
-        namespace-names' (distinct
-                           (map
-                             (fn [definition-name]
-                               (first
-                                 (string/split
-                                   definition-name
-                                   (re-pattern "/"))))
-                             (keys (:definitions collection))))]
-    (if (= (sort namespace-names) (sort namespace-names'))
+  (let [namespace-names (into
+                          (hash-set)
+                          (keys (:namespaces collection)))
+        namespace-names' (into
+                           (hash-set)
+                           (distinct
+                             (map
+                               (fn 
+                                 [definition-name]
+                                 (first
+                                   (string/split
+                                     definition-name
+                                     (re-pattern "/"))))
+                               (keys (:definitions collection)))))]
+    (if (= namespace-names namespace-names')
       (doall
         (->>
           namespace-names
@@ -143,6 +148,6 @@
           (into {})))
       (do
         (println (style "Error: namespaces not match!" :red))
-        (println "    from definitions:" namespace-names)
-        (println "    from namespaces: " namespace-names')
+        (println "    from definitions:" (pr-str namespace-names))
+        (println "    from namespaces: " (pr-str namespace-names'))
         {}))))

@@ -1,3 +1,5 @@
 
-/.nrepl-*
-/target
+/target/
+/.nrepl*
+/src/*.*
+/src/.*
