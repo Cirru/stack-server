@@ -64,7 +64,6 @@
                                       sepal-data
                                       fileset
                                       extname)]
-                                   (reset! stack-sepal-ref sepal-data)
                                    (comment
                                      println
                                      "writing file:"
@@ -73,6 +72,7 @@
                                    (binding 
                                      [*warnings* (atom 0)]
                                      (next-handler result))
+                                   (reset! stack-sepal-ref sepal-data)
                                    (spit file-path new-content)
                                    {:headers (merge cors-headers),
                                     :status 200,
