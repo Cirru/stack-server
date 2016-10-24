@@ -8,14 +8,14 @@
                   [ring/ring-core            "1.5.0"]
                   [ring/ring-jetty-adapter   "1.5.0"]
                   [ring-cors                 "0.1.8"]
-                  [cirru/sepal               "0.0.13"]
+                  [cirru/sepal               "0.0.14"]
                   [cumulo/shallow-diff       "0.1.1"]])
 
 (require '[adzerk.boot-test   :refer :all]
          '[clojure.java.io    :as    io]
          '[stack-server.core  :refer [start-stack-editor! transform-stack]])
 
-(def +version+ "0.1.18")
+(def +version+ "0.1.19")
 
 (task-options!
   pom {:project     'cirru/boot-stack-server
