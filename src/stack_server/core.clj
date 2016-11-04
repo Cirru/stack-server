@@ -50,9 +50,9 @@
                                         changes (read-string changes-content)
                                         new-sepal-data (patch @stack-sepal-ref changes)
                                         result (make-result new-sepal-data fileset extname)]
-                                    (reset! stack-sepal-ref new-sepal-data)
                                     (comment println "writing file:" file-path new-content)
                                     (binding [*warnings* (atom 0)] (next-handler result))
+                                    (reset! stack-sepal-ref new-sepal-data)
                                     (spit file-path (pr-str new-sepal-data))
                                     {:headers (merge cors-headers),
                                      :status 200,
