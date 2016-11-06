@@ -39,9 +39,9 @@
                                         sepal-data (read-string new-content)
                                         result (make-result sepal-data fileset extname)]
                                     (comment println "writing file:" file-path new-content)
+                                    (spit file-path new-content)
                                     (binding [*warnings* (atom 0)] (next-handler result))
                                     (reset! stack-sepal-ref sepal-data)
-                                    (spit file-path new-content)
                                     {:headers (merge cors-headers),
                                      :status 200,
                                      :body (pr-str {:status "ok"})})
@@ -51,9 +51,9 @@
                                         new-sepal-data (patch @stack-sepal-ref changes)
                                         result (make-result new-sepal-data fileset extname)]
                                     (comment println "writing file:" file-path new-content)
+                                    (spit file-path (pr-str new-sepal-data))
                                     (binding [*warnings* (atom 0)] (next-handler result))
                                     (reset! stack-sepal-ref new-sepal-data)
-                                    (spit file-path (pr-str new-sepal-data))
                                     {:headers (merge cors-headers),
                                      :status 200,
                                      :body (pr-str {:status "ok"})})
