@@ -7,6 +7,18 @@
             [clojure.java.io :as io]
             [shallow-diff.patch :refer [patch]]))
 
+(defn make-header [request]
+  {"Access-Control-Allow-Origin" (get-in request [:headers "origin"]),
+   "Content-Type" "text/edn; charset=UTF-8",
+   "Access-Control-Allow-Methods" "GET, POST, PATCH, OPTIONS"})
+
+(defn respond [file-path new-content next-handler result sepal-ref sepal-data request]
+  (comment println "writing file:" file-path new-content)
+  (spit file-path new-content)
+  (binding [*warnings* (atom 0)] (next-handler result))
+  (reset! sepal-ref sepal-data)
+  {:headers (merge (make-header request)), :status 200, :body (pr-str {:status "ok"})})
+
 (defn make-result [collection fileset extname]
   (let [file-dict (collect-files collection), tmp (tmp-dir!)]
     (doseq [entry file-dict]
@@ -21,50 +33,32 @@
  (fn [next-handler]
    (fn [fileset]
      (let [file-path (or filename "stack-sepal.ir")
-           stack-sepal-ref (atom (read-string (slurp file-path)))
-           editor-handler (fn [request]
-                            (let [cors-headers {"Access-Control-Allow-Origin" (get-in
-                                                                               request
-                                                                               [:headers
-                                                                                "origin"]),
-                                                "Content-Type" "text/edn; charset=UTF-8",
-                                                "Access-Control-Allow-Methods" "GET, POST, PATCH, OPTIONS"}]
-                              (cond
-                                (= (:request-method request) :get)
-                                  {:headers (merge cors-headers),
-                                   :status 200,
-                                   :body (pr-str @stack-sepal-ref)}
-                                (= (:request-method request) :post)
-                                  (let [new-content (slurp (:body request))
-                                        sepal-data (read-string new-content)
-                                        result (make-result sepal-data fileset extname)]
-                                    (comment println "writing file:" file-path new-content)
-                                    (spit file-path new-content)
-                                    (binding [*warnings* (atom 0)] (next-handler result))
-                                    (reset! stack-sepal-ref sepal-data)
-                                    {:headers (merge cors-headers),
-                                     :status 200,
-                                     :body (pr-str {:status "ok"})})
-                                (= (:request-method request) :patch)
-                                  (let [changes-content (slurp (:body request))
-                                        changes (read-string changes-content)
-                                        new-sepal-data (patch @stack-sepal-ref changes)
-                                        result (make-result new-sepal-data fileset extname)]
-                                    (comment println "writing file:" file-path new-content)
-                                    (spit file-path (pr-str new-sepal-data))
-                                    (binding [*warnings* (atom 0)] (next-handler result))
-                                    (reset! stack-sepal-ref new-sepal-data)
-                                    {:headers (merge cors-headers),
-                                     :status 200,
-                                     :body (pr-str {:status "ok"})})
-                                (= (:request-method request) :options)
-                                  {:headers (merge cors-headers), :status 200, :body "ok"}
-                                :else
-                                  {:headers (merge cors-headers),
-                                   :status 404,
-                                   :body (pr-str {:status "ok"})})))]
-       (run-jetty editor-handler {:port (or port 7010), :join? false})
-       (next-handler (make-result @stack-sepal-ref fileset extname))))))
+           sepal-ref (atom (read-string (slurp file-path)))]
+       (run-jetty
+        (fn [request]
+          (cond
+            (= (:request-method request) :get)
+              {:headers (merge (make-header request)), :status 200, :body (pr-str @sepal-ref)}
+            (= (:request-method request) :post)
+              (let [raw-sepal (slurp (:body request))
+                    sepal-data (read-string raw-sepal)
+                    result (make-result sepal-data fileset extname)]
+                (respond file-path raw-sepal next-handler result sepal-ref sepal-data request))
+            (= (:request-method request) :patch)
+              (let [changes-content (slurp (:body request))
+                    changes (read-string changes-content)
+                    sepal-data (patch @sepal-ref changes)
+                    result (make-result sepal-data fileset extname)
+                    raw-sepal (pr-str sepal-data)]
+                (respond file-path raw-sepal next-handler result sepal-ref sepal-data request))
+            (= (:request-method request) :options)
+              {:headers (merge (make-header request)), :status 200, :body "ok"}
+            :else
+              {:headers (merge (make-header request)),
+               :status 404,
+               :body (pr-str {:status "ok"})}))
+        {:port (or port 7010), :join? false})
+       (next-handler (make-result @sepal-ref fileset extname))))))
 
 (deftask
  transform-stack
