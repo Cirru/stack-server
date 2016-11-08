@@ -39,10 +39,9 @@
     Exception
     e
     (do
-     (println e)
-     {:headers (make-header request),
-      :status 406,
-      :body (pr-str {:status :failed, :message (:cause e)})}))))
+     (.printStackTrace e)
+     (println "Error Message:" (.getMessage e))
+     {:headers (make-header request), :status 406, :body (pr-str {:status (.getMessage e)})}))))
 
 (deftask
  start-stack-editor!

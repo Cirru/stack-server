@@ -28,7 +28,7 @@
 (deftask dev! []
   (comp
     (repl)
-    (start-stack-editor! :port 7010 :extname ".clj" :filename "stack-sepal.ir")
+    (start-stack-editor! :port 7011 :extname ".clj" :filename "stack-sepal.ir")
     (target :dir #{"src/"})))
 
 (deftask demo! []
