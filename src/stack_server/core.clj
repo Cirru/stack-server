@@ -12,13 +12,6 @@
    "Content-Type" "text/edn; charset=UTF-8",
    "Access-Control-Allow-Methods" "GET, POST, PATCH, OPTIONS"})
 
-(defn respond [file-path new-content next-handler result sepal-ref sepal-data request]
-  (comment println "writing file:" file-path new-content)
-  (spit file-path new-content)
-  (binding [*warnings* (atom 0)] (next-handler result))
-  (reset! sepal-ref sepal-data)
-  {:headers (merge (make-header request)), :status 200, :body (pr-str {:status "ok"})})
-
 (defn make-result [collection fileset extname]
   (let [file-dict (collect-files collection), tmp (tmp-dir!)]
     (doseq [entry file-dict]
@@ -26,6 +19,30 @@
         (io/make-parents file-path)
         (spit file-path (val entry))))
     (-> fileset (add-resource tmp) (commit!))))
+
+(defn respond [file-path
+               new-content
+               next-handler
+               fileset
+               extname
+               sepal-ref
+               sepal-data
+               request]
+  (try
+   (let [result (make-result sepal-data fileset extname)]
+     (comment println "writing file:" file-path new-content)
+     (spit file-path new-content)
+     (binding [*warnings* (atom 0)] (next-handler result))
+     (reset! sepal-ref sepal-data)
+     {:headers (merge (make-header request)), :status 200, :body (pr-str {:status "ok"})})
+   (catch
+    Exception
+    e
+    (do
+     (println e)
+     {:headers (make-header request),
+      :status 406,
+      :body (pr-str {:status :failed, :message (:cause e)})}))))
 
 (deftask
  start-stack-editor!
@@ -40,17 +57,30 @@
             (= (:request-method request) :get)
               {:headers (merge (make-header request)), :status 200, :body (pr-str @sepal-ref)}
             (= (:request-method request) :post)
-              (let [raw-sepal (slurp (:body request))
-                    sepal-data (read-string raw-sepal)
-                    result (make-result sepal-data fileset extname)]
-                (respond file-path raw-sepal next-handler result sepal-ref sepal-data request))
+              (let [raw-sepal (slurp (:body request)), sepal-data (read-string raw-sepal)]
+                (respond
+                 file-path
+                 raw-sepal
+                 next-handler
+                 fileset
+                 extname
+                 sepal-ref
+                 sepal-data
+                 request))
             (= (:request-method request) :patch)
               (let [changes-content (slurp (:body request))
                     changes (read-string changes-content)
                     sepal-data (patch @sepal-ref changes)
-                    result (make-result sepal-data fileset extname)
                     raw-sepal (pr-str sepal-data)]
-                (respond file-path raw-sepal next-handler result sepal-ref sepal-data request))
+                (respond
+                 file-path
+                 raw-sepal
+                 next-handler
+                 fileset
+                 extname
+                 sepal-ref
+                 sepal-data
+                 request))
             (= (:request-method request) :options)
               {:headers (merge (make-header request)), :status 200, :body "ok"}
             :else
