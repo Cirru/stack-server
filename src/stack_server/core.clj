@@ -12,6 +12,8 @@
    "Content-Type" "text/edn; charset=UTF-8",
    "Access-Control-Allow-Methods" "GET, POST, PATCH, OPTIONS"})
 
+(defn response [code headers body] {:headers headers, :status code, :body body})
+
 (defn make-result [collection fileset extname]
   (let [file-dict (collect-files collection), tmp (tmp-dir!)]
     (doseq [entry file-dict]
@@ -41,7 +43,7 @@
     (do
      (.printStackTrace e)
      (println "Error Message:" (.getMessage e))
-     {:headers (make-header request), :status 406, :body (pr-str {:status (.getMessage e)})}))))
+     (response 406 (make-header request) (pr-str {:status (.getMessage e)}))))))
 
 (deftask
  start-stack-editor!
@@ -80,12 +82,8 @@
                  sepal-ref
                  sepal-data
                  request))
-            (= (:request-method request) :options)
-              {:headers (merge (make-header request)), :status 200, :body "ok"}
-            :else
-              {:headers (merge (make-header request)),
-               :status 404,
-               :body (pr-str {:status "ok"})}))
+            (= (:request-method request) :options) (response 200 (make-header request) "ok")
+            :else (response 404 (make-header request) (pr-str {:status "ok"}))))
         {:port (or port 7010), :join? false})
        (next-handler (make-result @sepal-ref fileset extname))))))
 

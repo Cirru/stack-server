@@ -1,1 +1,1 @@
-{:definitions {"demo.core/main" ["defn" "main" [] ["println" ["#{}" "1" "2" "3"]]]}, :namespaces {"demo.core" ["ns" "demo.core"]}, :main-definition nil, :procedures {}}
+{:package "demo", :definitions {"core/main" ["defn" "main" [] ["println" ["#{}" "1" "2" "3"]]]}, :namespaces {"core" ["ns" "demo.core"]}, :main-definition nil, :procedures {}}

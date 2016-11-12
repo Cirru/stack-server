@@ -39,9 +39,8 @@
     (let [cursor (first items), next-acc (deps-insert [] cursor acc deps-info)]
       (recur next-acc (into [] (rest items)) deps-info))))
 
-(defn generate-file [ns-line definitions procedure-line]
-  (let [ns-name (get ns-line 1)
-        var-names (->> (keys definitions)
+(defn generate-file [ns-name ns-line definitions procedure-line]
+  (let [var-names (->> (keys definitions)
                        (map (fn [var-name] (last (string/split var-name (re-pattern "/")))))
                        (into (hash-set)))
         deps-info (->> definitions
@@ -77,7 +76,8 @@
     code))
 
 (defn collect-files [collection]
-  (let [namespace-names (into (hash-set) (keys (:namespaces collection)))
+  (let [package (:package collection)
+        namespace-names (into (hash-set) (keys (:namespaces collection)))
         namespace-names' (into
                           (hash-set)
                           (distinct
@@ -85,13 +85,15 @@
                             (fn [definition-name]
                               (first (string/split definition-name (re-pattern "/"))))
                             (keys (:definitions collection)))))]
+    (if (nil? package) (throw (Exception. "`:package` not defined!")))
     (if (= namespace-names namespace-names')
       (doall
        (->> namespace-names
             (map
              (fn [ns-name]
-               [(ns->path ns-name)
+               [(ns->path (str package "." ns-name))
                 (generate-file
+                 ns-name
                  (get-in collection [:namespaces ns-name])
                  (->> (:definitions collection)
                       (filter

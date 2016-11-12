@@ -15,7 +15,7 @@
          '[clojure.java.io    :as    io]
          '[stack-server.core  :refer [start-stack-editor! transform-stack]])
 
-(def +version+ "0.1.22")
+(def +version+ "0.1.23")
 
 (task-options!
   pom {:project     'cirru/boot-stack-server
@@ -28,7 +28,7 @@
 (deftask dev! []
   (comp
     (repl)
-    (start-stack-editor! :port 7011 :extname ".clj" :filename "stack-sepal.ir")
+    (start-stack-editor! :port 7010 :extname ".clj" :filename "stack-sepal.ir")
     (target :dir #{"src/"})))
 
 (deftask demo! []
@@ -39,7 +39,7 @@
 
 (deftask generate-code []
   (comp
-    (transform-stack :port 7010 :extname ".clj" :filename "stack-sepal.ir")
+    (transform-stack :extname ".clj" :filename "stack-sepal.ir")
     (target :dir #{"src/"})))
 
 (deftask build []
