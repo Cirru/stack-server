@@ -2,7 +2,7 @@
 (set-env!
   :source-paths #{"src/"}
   :dependencies '[[org.clojure/clojure       "1.8.0"       :scope "test"]
-                  [org.clojure/clojurescript "1.9.216"     :scope "test"]
+                  [org.clojure/clojurescript "1.9.293"     :scope "test"]
                   [adzerk/boot-test          "1.1.2"       :scope "test"]
                   [clansi                    "1.0.0"]
                   [ring/ring-core            "1.5.0"]
@@ -15,7 +15,7 @@
          '[clojure.java.io    :as    io]
          '[stack-server.core  :refer [start-stack-editor! transform-stack]])
 
-(def +version+ "0.1.23")
+(def +version+ "0.1.24")
 
 (task-options!
   pom {:project     'cirru/boot-stack-server
@@ -27,13 +27,13 @@
 
 (deftask dev! []
   (comp
-    (repl)
+    (wait)
     (start-stack-editor! :port 7010 :extname ".clj" :filename "stack-sepal.ir")
     (target :dir #{"src/"})))
 
 (deftask demo! []
   (comp
-    (repl)
+    (wait)
     (start-stack-editor! :port 7011 :extname ".clj" :filename "example/stack-sepal.ir")
     (target :dir #{"example/src/"})))
 

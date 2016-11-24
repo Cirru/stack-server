@@ -26,6 +26,8 @@
           (into [] (concat acc [new-item] items)))
         (recur (conj acc cursor) new-item (rest items) deps-info)))))
 
+(def files-cache-ref (atom {}))
+
 (defn ns->path [namespace-name]
   (-> namespace-name
       (string/replace (re-pattern "\\.") "/")
@@ -39,8 +41,9 @@
     (let [cursor (first items), next-acc (deps-insert [] cursor acc deps-info)]
       (recur next-acc (into [] (rest items)) deps-info))))
 
-(defn generate-file [ns-name ns-line definitions procedure-line]
-  (let [var-names (->> (keys definitions)
+(defn generate-file [file-info]
+  (let [[ns-name ns-line definitions procedure-line] file-info
+        var-names (->> (keys definitions)
                        (map (fn [var-name] (last (string/split var-name (re-pattern "/")))))
                        (into (hash-set)))
         deps-info (->> definitions
@@ -87,20 +90,25 @@
                             (keys (:definitions collection)))))]
     (if (nil? package) (throw (Exception. "`:package` not defined!")))
     (if (= namespace-names namespace-names')
-      (doall
-       (->> namespace-names
-            (map
-             (fn [ns-name]
-               [(ns->path (str package "." ns-name))
-                (generate-file
-                 ns-name
-                 (get-in collection [:namespaces ns-name])
-                 (->> (:definitions collection)
-                      (filter
-                       (fn [entry] (string/starts-with? (key entry) (str ns-name "/"))))
-                      (into {}))
-                 (or (get-in collection [:procedures ns-name]) []))]))
-            (into {})))
+      (->> namespace-names
+           (map
+            (fn [ns-name]
+              [(ns->path (str package "." ns-name))
+               [ns-name
+                (get-in collection [:namespaces ns-name])
+                (->> (:definitions collection)
+                     (filter
+                      (fn [entry] (string/starts-with? (key entry) (str ns-name "/"))))
+                     (into {}))
+                (or (get-in collection [:procedures ns-name]) [])]]))
+           (filter
+            (fn [pair]
+              (let [[k v] pair]
+                (if (= v (get @files-cache-ref k))
+                  (do (comment println "File remains:" k) false)
+                  (do (swap! files-cache-ref assoc k v) (println "File compiled:" k) true)))))
+           (map (fn [pair] (let [[k v] pair] [k (generate-file v)])))
+           (into {}))
       (do
        (println (style "Error: namespaces not match!" :red))
        (println "    from definitions:" (pr-str namespace-names))

@@ -7,6 +7,8 @@
             [clojure.java.io :as io]
             [shallow-diff.patch :refer [patch]]))
 
+(def global-tmp-dir (tmp-dir!))
+
 (defn make-header [request]
   {"Access-Control-Allow-Origin" (get-in request [:headers "origin"]),
    "Content-Type" "text/edn; charset=UTF-8",
@@ -15,12 +17,14 @@
 (defn response [code headers body] {:headers headers, :status code, :body body})
 
 (defn make-result [collection fileset extname]
-  (let [file-dict (collect-files collection), tmp (tmp-dir!)]
+  (let [file-dict (collect-files collection)]
     (doseq [entry file-dict]
-      (let [file-path (io/file tmp (str (key entry) (if (some? extname) extname ".cljs")))]
+      (let [file-path (io/file
+                       global-tmp-dir
+                       (str (key entry) (if (some? extname) extname ".cljs")))]
         (io/make-parents file-path)
         (spit file-path (val entry))))
-    (-> fileset (add-resource tmp) (commit!))))
+    (-> fileset (add-resource global-tmp-dir) (commit!))))
 
 (defn respond [file-path
                new-content
