@@ -4,11 +4,11 @@
   :dependencies '[[org.clojure/clojure       "1.8.0"       :scope "test"]
                   [org.clojure/clojurescript "1.9.293"     :scope "test"]
                   [adzerk/boot-test          "1.1.2"       :scope "test"]
-                  [clansi                    "1.0.0"]
                   [ring/ring-core            "1.5.0"]
                   [ring/ring-jetty-adapter   "1.5.0"]
                   [ring-cors                 "0.1.8"]
-                  [cirru/sepal               "0.0.14"]
+                  [cirru/sepal               "0.0.15"]
+                  [andare                    "0.4.0"]
                   [cumulo/shallow-diff       "0.1.1"]])
 
 (require '[adzerk.boot-test   :refer :all]

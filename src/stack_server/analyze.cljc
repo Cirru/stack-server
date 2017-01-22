@@ -1,6 +1,6 @@
 
 (ns stack-server.analyze
-  (:require [clojure.string :as string] [cirru.sepal :as sepal] [clansi :refer [style]]))
+  (:require [clojure.string :as string] [cirru.sepal :as sepal]))
 
 (defn depends-on? [x y dict level]
   (if (contains? dict x)
@@ -110,7 +110,7 @@
            (map (fn [pair] (let [[k v] pair] [k (generate-file v)])))
            (into {}))
       (do
-       (println (style "Error: namespaces not match!" :red))
+       (println "Error: namespaces not match!" :red)
        (println "    from definitions:" (pr-str namespace-names))
        (println "    from namespaces: " (pr-str namespace-names'))
        {}))))
