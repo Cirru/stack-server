@@ -12,21 +12,11 @@ Server side toolchain for stack-editor.
 [cirru/boot-stack-server "0.1.24"]
 ```
 
-```clojure
-[stack-server.core :refer [start-stack-editor! transform-stack]]
-
-(comp
-  (start-stack-editor! :port 7010 :extname ".cljs" :filename "stack-sepal.ir"))
-
-(comp
-  (transform-stack :extname ".cljs" :filename "stack-sepal.ir"))
-```
-
-### Develop
+Copy `server.cljs` and run with Lumo:
 
 ```bash
-boot dev! # compiles to `src/`
-boot demo! # compiles to `example/src/`
+export boot_deps=`boot show -c`
+lumo -Kc $boot_deps:src/ -i server.cljs
 ```
 
 ### License

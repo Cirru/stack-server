@@ -3,7 +3,8 @@
   (:require        [cljs.reader :refer [read-string]]
                    [cljs.core.async :refer [<! >! timeout chan]]
                    [shallow-diff.patch :refer [patch]]
-                   [stack-server.analyze :refer [collect-files]])
+                   [stack-server.analyze :refer [collect-files]]
+                   [clojure.pprint :as pprint])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def fs (js/require "fs"))
@@ -11,7 +12,8 @@
 (def path (js/require "path"))
 
 (def ir-path "example/stack-sepal.ir")
-(def out-folder "example/")
+(def out-folder "example/src/")
+(def extname ".clj")
 
 (def sepal-ref
   (atom (read-string (fs.readFileSync ir-path "utf8"))))
@@ -30,7 +32,7 @@
   (let [file-dict (collect-files sepal-data)]
     (doseq [entry file-dict]
       (let [[file-name content] entry]
-        (fs.writeFileSync (path.join out-folder file-name) content)))))
+        (fs.writeFileSync (path.join out-folder (str file-name extname)) content)))))
 
 (defn req-handler [req res]
   (.setHeader res "Access-Control-Allow-Origin" req.headers.origin)
@@ -60,3 +62,4 @@
     (println "App listening on 7010.")))
 
 (create-app!)
+(write-source! @sepal-ref)
