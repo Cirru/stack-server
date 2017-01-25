@@ -3,8 +3,7 @@
   (:require        [cljs.reader :refer [read-string]]
                    [cljs.core.async :refer [<! >! timeout chan]]
                    [shallow-diff.patch :refer [patch]]
-                   [stack-server.analyze :refer [collect-files]]
-                   [clojure.pprint :as pprint])
+                   [stack-server.analyze :refer [collect-files]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def fs (js/require "fs"))
