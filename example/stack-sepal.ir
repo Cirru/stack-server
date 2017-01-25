@@ -1,1 +1,1 @@
-{:definitions {"core/main" ["defn" "main" [] ["println" ["#{}" "1" "2" "3"]]]}, :namespaces {"core" ["ns" "demo.core"]}, :procedures {}, :package "demo"}
+{:definitions {"core/main" ["defn" "main" [] ["let" [["a" "1"] ["b" "2"] ["c" "3"]] ["println" ["#{}" "1" "2" "3"]]] ["println" ["#{}" "1" "2" "3"]] ["println" ["#{}" "1" "2" "3"]] ["println" ["#{}" "1" "2" "3"]]]}, :namespaces {"core" ["ns" "demo.core"]}, :procedures {}, :package "demo"}
