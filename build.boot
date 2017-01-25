@@ -1,6 +1,6 @@
 
 (set-env!
-  :source-paths #{"src/"}
+  :resource-paths #{"src/"}
   :dependencies '[[org.clojure/clojure       "1.8.0"       :scope "test"]
                   [org.clojure/clojurescript "1.9.293"     :scope "test"]
                   [adzerk/boot-test          "1.1.2"       :scope "test"]
@@ -11,7 +11,7 @@
 (require '[adzerk.boot-test   :refer :all]
          '[clojure.java.io    :as    io])
 
-(def +version+ "0.1.26")
+(def +version+ "0.1.27")
 
 (task-options!
   pom {:project     'cirru/boot-stack-server
