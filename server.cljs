@@ -10,9 +10,9 @@
 (def http (js/require "http"))
 (def path (js/require "path"))
 
-(def ir-path "example/stack-sepal.ir")
-(def out-folder "example/src/")
-(def extname ".clj")
+(def ir-path "stack-sepal.ir")
+(def out-folder "src/")
+(def extname ".cljc")
 
 (def sepal-ref
   (atom (read-string (fs.readFileSync ir-path "utf8"))))
@@ -31,6 +31,7 @@
   (let [file-dict (collect-files sepal-data)]
     (doseq [entry file-dict]
       (let [[file-name content] entry]
+        (println "File compiled:" file-name)
         (fs.writeFileSync (path.join out-folder (str file-name extname)) content)))))
 
 (defn req-handler [req res]

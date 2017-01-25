@@ -6,12 +6,13 @@
                   [adzerk/boot-test          "1.1.2"       :scope "test"]
                   [cirru/sepal               "0.0.17"]
                   [andare                    "0.4.0"]
+                  [mvc-works/polyfill        "0.1.1"]
                   [cumulo/shallow-diff       "0.1.1"]])
 
 (require '[adzerk.boot-test   :refer :all]
          '[clojure.java.io    :as    io])
 
-(def +version+ "0.1.27")
+(def +version+ "0.1.28")
 
 (task-options!
   pom {:project     'cirru/boot-stack-server

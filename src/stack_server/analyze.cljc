@@ -1,5 +1,6 @@
 
-(ns stack-server.analyze (:require [clojure.string :as string] [cirru.sepal :as sepal]))
+(ns stack-server.analyze
+  (:require [clojure.string :as string] [cirru.sepal :as sepal] [polyfill.core :as polyfill]))
 
 (defn depends-on? [x y dict level]
   (if (contains? dict x)
@@ -87,7 +88,7 @@
                             (fn [definition-name]
                               (first (string/split definition-name (re-pattern "/"))))
                             (keys (:definitions collection)))))]
-    (if (nil? package) (println "`:package` not defined!"))
+    (if (nil? package) (polyfill/raise* "`:package` not defined!"))
     (if (= namespace-names namespace-names')
       (->> namespace-names
            (map
@@ -104,8 +105,8 @@
             (fn [pair]
               (let [[k v] pair]
                 (if (= v (get @files-cache-ref k))
-                  (do (comment println "File remains:" k) false)
-                  (do (swap! files-cache-ref assoc k v) (println "File compiled:" k) true)))))
+                  (do false)
+                  (do (swap! files-cache-ref assoc k v) true)))))
            (map (fn [pair] (let [[k v] pair] [k (generate-file v)])))
            (into {}))
       (do
