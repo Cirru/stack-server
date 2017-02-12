@@ -3,7 +3,8 @@
   (:require        [cljs.reader :refer [read-string]]
                    [cljs.core.async :refer [<! >! timeout chan]]
                    [shallow-diff.patch :refer [patch]]
-                   [stack-server.analyze :refer [generate-file ns->path]])
+                   [stack-server.analyze :refer [generate-file ns->path]]
+                   [fipp.edn :refer [pprint]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def fs (js/require "fs"))
@@ -25,7 +26,7 @@
     body-chan))
 
 (defn rewrite-file! [content]
-  (fs.writeFileSync ir-path content))
+  (fs.writeFileSync ir-path (with-out-str (pprint content {:width 120}))))
 
 (defn write-by-file [pkg ns-part file-info]
   (let [file-name (str (ns->path pkg ns-part) extname)
@@ -57,15 +58,15 @@
                 new-data (read-string content)]
             (compare-write-source! new-data)
             (.end res (pr-str {:status "ok"}))
-            (rewrite-file! content)
-            (reset! sepal-ref sepal-data)))
+            (rewrite-file! new-data)
+            (reset! sepal-ref new-data)))
     "PATCH"
       (go (let [changes-content (<! (read-body req))
                 new-data (patch @sepal-ref (read-string changes-content))]
             (compare-write-source! new-data)
             (.end res (pr-str {:status "ok"}))
-            (rewrite-file! (pr-str new-data))
-            (reset! sepal-ref sepal-data)))
+            (rewrite-file! new-data)
+            (reset! sepal-ref new-data)))
     (.end res (str "Unknown:" req.method))))
 
 (defn create-app! []
@@ -73,5 +74,6 @@
     (.listen app 7010)
     (println "App listening on 7010.")))
 
-(create-app!)
-(compile-source! @sepal-ref)
+(if (= js/process.env.op "compile")
+  (compile-source! @sepal-ref)
+  (create-app!))
