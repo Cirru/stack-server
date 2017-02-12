@@ -13,7 +13,7 @@
 (require '[adzerk.boot-test   :refer :all]
          '[clojure.java.io    :as    io])
 
-(def +version+ "0.1.28")
+(def +version+ "0.1.29")
 
 (task-options!
   pom {:project     'cirru/boot-stack-server
