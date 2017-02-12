@@ -7,7 +7,8 @@
                   [cirru/sepal               "0.0.17"]
                   [andare                    "0.4.0"]
                   [mvc-works/polyfill        "0.1.1"]
-                  [cumulo/shallow-diff       "0.1.1"]])
+                  [cumulo/shallow-diff       "0.1.1"]
+                  [fipp                      "0.6.9"]])
 
 (require '[adzerk.boot-test   :refer :all]
          '[clojure.java.io    :as    io])
