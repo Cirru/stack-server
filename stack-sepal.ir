@@ -1,1 +1,125 @@
-{:definitions {"analyze/collect-files" ["defn" "collect-files" ["collection"] ["let" [["package" [":package" "collection"]] ["namespace-names" ["into" ["hash-set"] ["keys" [":namespaces" "collection"]]]] ["namespace-names'" ["into" ["hash-set"] ["distinct" ["map" ["fn" ["definition-name"] ["first" ["string/split" "definition-name" ["re-pattern" "|/"]]]] ["keys" [":definitions" "collection"]]]]]]] ["if" ["nil?" "package"] ["polyfill/raise*" "|`:package` not defined!"]] ["if" ["=" "namespace-names" "namespace-names'"] ["->>" "namespace-names" ["map" ["fn" ["ns-name"] ["[]" ["ns->path" ["str" "package" "|." "ns-name"]] ["[]" "ns-name" ["get-in" "collection" ["[]" ":namespaces" "ns-name"]] ["->>" [":definitions" "collection"] ["filter" ["fn" ["entry"] ["string/starts-with?" ["key" "entry"] ["str" "ns-name" "|/"]]]] ["into" ["{}"]]] ["or" ["get-in" "collection" ["[]" ":procedures" "ns-name"]] ["[]"]]]]]] ["filter" ["fn" ["pair"] ["let" [[["[]" "k" "v"] "pair"]] ["if" ["=" "v" ["get" "@files-cache-ref" "k"]] ["do" "false"] ["do" ["swap!" "files-cache-ref" "assoc" "k" "v"] "true"]]]]] ["map" ["fn" ["pair"] ["let" [[["[]" "k" "v"] "pair"]] ["[]" "k" ["generate-file" "v"]]]]] ["into" ["{}"]]] ["do" ["println" "|Error: namespaces not match!"] ["println" "|    from definitions:" ["pr-str" "namespace-names"]] ["println" "|    from namespaces: " ["pr-str" "namespace-names'"]] ["{}"]]]]], "analyze/files-cache-ref" ["def" "files-cache-ref" ["atom" ["{}"]]], "analyze/depends-on?" ["defn" "depends-on?" ["x" "y" "dict" "level"] ["if" ["contains?" "dict" "x"] ["let" [["deps" [":tokens" ["get" "dict" "x"]]]] ["if" ["contains?" "deps" "y"] "true" ["if" [">" "level" "4"] "false" ["some" ["fn" ["child"] ["depends-on?" "child" "y" "dict" ["inc" "level"]]] "deps"]]]] "false"]], "analyze/ns->path" ["defn" "ns->path" ["namespace-name"] ["->" "namespace-name" ["string/replace" ["re-pattern" "|\\."] "|/"] ["string/replace" ["re-pattern" "|-"] "|_"]]], "analyze/deps-insert" ["defn" "deps-insert" ["acc" "new-item" "items" "deps-info"] ["if" ["empty?" "items"] ["conj" "acc" "new-item"] ["let" [["cursor" ["first" "items"]]] ["if" ["depends-on?" "cursor" "new-item" "deps-info" "0"] ["if" ["depends-on?" "new-item" "cursor" "deps-info" "0"] ["if" ["contains?" "def-names" [":kind" ["get" "deps-info" "new-item"]]] ["recur" ["conj" "acc" "cursor"] "new-item" ["rest" "items"] "deps-info"] ["into" ["[]"] ["concat" "acc" ["[]" "new-item"] "items"]]] ["into" ["[]"] ["concat" "acc" ["[]" "new-item"] "items"]]] ["recur" ["conj" "acc" "cursor"] "new-item" ["rest" "items"] "deps-info"]]]]], "analyze/deps-sort" ["defn" "deps-sort" ["acc" "items" "deps-info"] ["if" ["empty?" "items"] "acc" ["let" [["cursor" ["first" "items"]] ["next-acc" ["deps-insert" ["[]"] "cursor" "acc" "deps-info"]]] ["recur" "next-acc" ["into" ["[]"] ["rest" "items"]] "deps-info"]]]], "analyze/strip-atom" ["defn" "strip-atom" ["token"] ["if" ["string/starts-with?" "token" "|@"] ["subs" "token" "1"] "token"]], "analyze/generate-file" ["defn" "generate-file" ["file-info"] ["let" [[["[]" "ns-name" "ns-line" "definitions" "procedure-line"] "file-info"] ["var-names" ["->>" ["keys" "definitions"] ["map" ["fn" ["var-name"] ["last" ["string/split" "var-name" ["re-pattern" "|/"]]]]] ["into" ["hash-set"]]]] ["deps-info" ["->>" "definitions" ["map" ["fn" ["entry"] ["let" [["path" ["key" "entry"]] ["tree" ["val" "entry"]] ["var-name" ["last" ["string/split" "path" ["re-pattern" "|/"]]]] ["dep-tokens" ["->>" ["subvec" "tree" "2"] ["flatten"] ["distinct"] ["map" "strip-atom"] ["filter" ["fn" ["token"] ["and" ["contains?" "var-names" "token"] ["not=" "token" "var-name"]]]] ["into" ["hash-set"]]]]] ["[]" "var-name" ["{}" [":kind" ["first" "tree"]] [":tokens" "dep-tokens"]]]]]] ["into" ["{}"]]]] ["self-deps-names" ["filter" ["fn" ["x"] ["depends-on?" "x" "x" "deps-info" "0"]] "var-names"]] ["sorted-names" ["deps-sort" ["[]"] ["into" ["[]"] "var-names"] "deps-info"]] ["declarations" ["->>" "self-deps-names" ["map" ["fn" ["var-name"] ["[]" "|declare" "var-name"]]] ["into" ["[]"]]]] ["definition-lines" ["map" ["fn" ["var-name"] ["get" "definitions" ["str" "ns-name" "|/" "var-name"]]] "sorted-names"]] ["tree" ["into" ["[]"] ["concat" ["[]" "ns-line"] "declarations" "definition-lines" "procedure-line"]]] ["code" ["sepal/make-code" "tree"]]] ["--" "println" "|before sort:" "var-names"] ["--" "println" "|after  sort:" "sorted-names"] ["--" "println" "|generated file:" "code"] "code"]], "analyze/def-names" ["def" "def-names" ["#{}" "|def" "|defonce"]]}, :namespaces {"analyze" ["ns" "stack-server.analyze" [":require" ["[]" "clojure.string" ":as" "string"] ["[]" "cirru.sepal" ":as" "sepal"] ["[]" "polyfill.core" ":as" "polyfill"]]]}, :procedures {"analyze" [], "core" [["deftask" "start-stack-editor!" ["[]" "p" "port" "int" "|Port" "e" "extname" "VAL" "str" "|Extname" "f" "filename" "VAL" "str" "|Filename"] ["fn" ["next-handler"] ["fn" ["fileset"] ["let" [["file-path" ["or" "filename" "|stack-sepal.ir"]] ["sepal-ref" ["atom" ["read-string" ["slurp" "file-path"]]]]] ["run-jetty" ["fn" ["request"] ["cond" [["=" [":request-method" "request"] ":get"] ["{}" [":status" "200"] [":headers" ["merge" ["make-header" "request"]]] [":body" ["pr-str" "@sepal-ref"]]]] [["=" [":request-method" "request"] ":post"] ["let" [["raw-sepal" ["slurp" [":body" "request"]]] ["sepal-data" ["read-string" "raw-sepal"]]] ["respond" "file-path" "raw-sepal" "next-handler" "fileset" "extname" "sepal-ref" "sepal-data" "request"]]] [["=" [":request-method" "request"] ":patch"] ["let" [["changes-content" ["slurp" [":body" "request"]]] ["changes" ["read-string" "changes-content"]] ["sepal-data" ["patch" "@sepal-ref" "changes"]] ["raw-sepal" ["pr-str" "sepal-data"]]] ["respond" "file-path" "raw-sepal" "next-handler" "fileset" "extname" "sepal-ref" "sepal-data" "request"]]] [["=" [":request-method" "request"] ":options"] ["response" "200" ["make-header" "request"] "|ok"]] [":else" ["response" "404" ["make-header" "request"] ["pr-str" ["{}" [":status" "|ok"]]]]]]] ["{}" [":port" ["or" "port" "7010"]] [":join?" "false"]]] ["next-handler" ["make-result" "@sepal-ref" "fileset" "extname"]]]]]] ["deftask" "transform-stack" ["[]" "e" "extname" "VAL" "str" "|Extname" "f" "filename" "VAL" "str" "|Filename"] ["fn" ["next-handler"] ["fn" ["fileset"] ["let" [["file-path" ["or" "filename" "|stack-sepal.ir"]] ["stack-sepal" ["read-string" ["slurp" "file-path"]]]] ["next-handler" ["make-result" "stack-sepal" "fileset" "extname"]]]]]]]}, :package "stack-server"}
+{:package "stack-server",
+ :files {"analyze" {:ns ["ns"
+                         "stack-server.analyze"
+                         [":require"
+                          ["[]" "clojure.string" ":as" "string"]
+                          ["[]" "cirru.sepal" ":as" "sepal"]
+                          ["[]" "polyfill.core" ":as" "polyfill"]]],
+                    :defs {"files-cache-ref" ["def" "files-cache-ref" ["atom" ["{}"]]],
+                           "depends-on?" ["defn"
+                                          "depends-on?"
+                                          ["x" "y" "dict" "level"]
+                                          ["if"
+                                           ["contains?" "dict" "x"]
+                                           ["let"
+                                            [["deps" [":tokens" ["get" "dict" "x"]]]]
+                                            ["if"
+                                             ["contains?" "deps" "y"]
+                                             "true"
+                                             ["if"
+                                              [">" "level" "4"]
+                                              "false"
+                                              ["some"
+                                               ["fn" ["child"] ["depends-on?" "child" "y" "dict" ["inc" "level"]]]
+                                               "deps"]]]]
+                                           "false"]],
+                           "ns->path" ["defn"
+                                       "ns->path"
+                                       ["pkg" "ns-part"]
+                                       ["->"
+                                        ["str" "pkg" "|." "ns-part"]
+                                        ["string/replace" ["re-pattern" "|\\."] "|/"]
+                                        ["string/replace" ["re-pattern" "|-"] "|_"]]],
+                           "deps-insert" ["defn"
+                                          "deps-insert"
+                                          ["acc" "new-item" "items" "deps-info"]
+                                          ["if"
+                                           ["empty?" "items"]
+                                           ["conj" "acc" "new-item"]
+                                           ["let"
+                                            [["cursor" ["first" "items"]]]
+                                            ["if"
+                                             ["depends-on?" "cursor" "new-item" "deps-info" "0"]
+                                             ["if"
+                                              ["depends-on?" "new-item" "cursor" "deps-info" "0"]
+                                              ["if"
+                                               ["contains?" "def-names" [":kind" ["get" "deps-info" "new-item"]]]
+                                               ["recur" ["conj" "acc" "cursor"] "new-item" ["rest" "items"] "deps-info"]
+                                               ["into" ["[]"] ["concat" "acc" ["[]" "new-item"] "items"]]]
+                                              ["into" ["[]"] ["concat" "acc" ["[]" "new-item"] "items"]]]
+                                             ["recur" ["conj" "acc" "cursor"] "new-item" ["rest" "items"] "deps-info"]]]]],
+                           "deps-sort" ["defn"
+                                        "deps-sort"
+                                        ["acc" "items" "deps-info"]
+                                        ["if"
+                                         ["empty?" "items"]
+                                         "acc"
+                                         ["let"
+                                          [["cursor" ["first" "items"]]
+                                           ["next-acc" ["deps-insert" ["[]"] "cursor" "acc" "deps-info"]]]
+                                          ["recur" "next-acc" ["into" ["[]"] ["rest" "items"]] "deps-info"]]]],
+                           "strip-atom" ["defn"
+                                         "strip-atom"
+                                         ["token"]
+                                         ["if" ["string/starts-with?" "token" "|@"] ["subs" "token" "1"] "token"]],
+                           "generate-file" ["defn"
+                                            "generate-file"
+                                            ["ns-name" "file-info"]
+                                            ["let"
+                                             [["ns-line" [":ns" "file-info"]]
+                                              ["definitions" [":defs" "file-info"]]
+                                              ["procs" [":procs" "file-info"]]
+                                              ["var-names" ["into" ["#{}"] ["keys" "definitions"]]]
+                                              ["deps-info"
+                                               ["->>"
+                                                "definitions"
+                                                ["map"
+                                                 ["fn"
+                                                  ["entry"]
+                                                  ["--" "println" "|Handling definitons:" "entry"]
+                                                  ["let"
+                                                   [["var-name" ["first" "entry"]]
+                                                    ["tree" ["last" "entry"]]
+                                                    ["dep-tokens"
+                                                     ["->>"
+                                                      ["subvec" "tree" "2"]
+                                                      ["flatten"]
+                                                      ["distinct"]
+                                                      ["map" "strip-atom"]
+                                                      ["filter"
+                                                       ["fn"
+                                                        ["token"]
+                                                        ["and"
+                                                         ["contains?" "var-names" "token"]
+                                                         ["not=" "token" "var-name"]]]]
+                                                      ["into" ["hash-set"]]]]]
+                                                   ["[]"
+                                                    "var-name"
+                                                    ["{}" [":kind" ["first" "tree"]] [":tokens" "dep-tokens"]]]]]]
+                                                ["into" ["{}"]]]]
+                                              ["self-deps-names"
+                                               ["filter"
+                                                ["fn" ["x"] ["depends-on?" "x" "x" "deps-info" "0"]]
+                                                "var-names"]]
+                                              ["sorted-names"
+                                               ["deps-sort" ["[]"] ["into" ["[]"] "var-names"] "deps-info"]]
+                                              ["declarations"
+                                               ["->>"
+                                                "self-deps-names"
+                                                ["map" ["fn" ["var-name"] ["[]" "|declare" "var-name"]]]
+                                                ["into" ["[]"]]]]
+                                              ["definition-lines"
+                                               ["map"
+                                                ["fn" ["var-name"] ["get" "definitions" "var-name"]]
+                                                "sorted-names"]]
+                                              ["tree"
+                                               ["into"
+                                                ["[]"]
+                                                ["concat" ["[]" "ns-line"] "declarations" "definition-lines" "procs"]]]
+                                              ["code" ["sepal/make-code" "tree"]]]
+                                             ["--" "println" "|before sort:" "var-names"]
+                                             ["--" "println" "|after  sort:" "sorted-names"]
+                                             ["--" "println" "|generated file:" "code"]
+                                             "code"]],
+                           "def-names" ["def" "def-names" ["#{}" "|def" "|defonce"]]},
+                    :procs []}}}

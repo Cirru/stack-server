@@ -2,6 +2,8 @@
 (ns stack-server.analyze
   (:require [clojure.string :as string] [cirru.sepal :as sepal] [polyfill.core :as polyfill]))
 
+(def files-cache-ref (atom {}))
+
 (defn depends-on? [x y dict level]
   (if (contains? dict x)
     (let [deps (:tokens (get dict x))]
@@ -11,6 +13,11 @@
           false
           (some (fn [child] (depends-on? child y dict (inc level))) deps))))
     false))
+
+(defn ns->path [pkg ns-part]
+  (-> (str pkg "." ns-part)
+      (string/replace (re-pattern "\\.") "/")
+      (string/replace (re-pattern "-") "_")))
 
 (def def-names #{"def" "defonce"})
 
@@ -26,32 +33,25 @@
           (into [] (concat acc [new-item] items)))
         (recur (conj acc cursor) new-item (rest items) deps-info)))))
 
-(def files-cache-ref (atom {}))
-
-(defn ns->path [namespace-name]
-  (-> namespace-name
-      (string/replace (re-pattern "\\.") "/")
-      (string/replace (re-pattern "-") "_")))
-
-(defn strip-atom [token] (if (string/starts-with? token "@") (subs token 1) token))
-
 (defn deps-sort [acc items deps-info]
   (if (empty? items)
     acc
     (let [cursor (first items), next-acc (deps-insert [] cursor acc deps-info)]
       (recur next-acc (into [] (rest items)) deps-info))))
 
-(defn generate-file [file-info]
-  (let [[ns-name ns-line definitions procedure-line] file-info
-        var-names (->> (keys definitions)
-                       (map (fn [var-name] (last (string/split var-name (re-pattern "/")))))
-                       (into (hash-set)))
+(defn strip-atom [token] (if (string/starts-with? token "@") (subs token 1) token))
+
+(defn generate-file [ns-name file-info]
+  (let [ns-line (:ns file-info)
+        definitions (:defs file-info)
+        procs (:procs file-info)
+        var-names (into #{} (keys definitions))
         deps-info (->> definitions
                        (map
                         (fn [entry]
-                          (let [path (key entry)
-                                tree (val entry)
-                                var-name (last (string/split path (re-pattern "/")))
+                          (comment println "Handling definitons:" entry)
+                          (let [var-name (first entry)
+                                tree (last entry)
                                 dep-tokens (->> (subvec tree 2)
                                                 (flatten)
                                                 (distinct)
@@ -68,49 +68,10 @@
         declarations (->> self-deps-names
                           (map (fn [var-name] ["declare" var-name]))
                           (into []))
-        definition-lines (map
-                          (fn [var-name] (get definitions (str ns-name "/" var-name)))
-                          sorted-names)
-        tree (into [] (concat [ns-line] declarations definition-lines procedure-line))
+        definition-lines (map (fn [var-name] (get definitions var-name)) sorted-names)
+        tree (into [] (concat [ns-line] declarations definition-lines procs))
         code (sepal/make-code tree)]
     (comment println "before sort:" var-names)
     (comment println "after  sort:" sorted-names)
     (comment println "generated file:" code)
     code))
-
-(defn collect-files [collection]
-  (let [package (:package collection)
-        namespace-names (into (hash-set) (keys (:namespaces collection)))
-        namespace-names' (into
-                          (hash-set)
-                          (distinct
-                           (map
-                            (fn [definition-name]
-                              (first (string/split definition-name (re-pattern "/"))))
-                            (keys (:definitions collection)))))]
-    (if (nil? package) (polyfill/raise* "`:package` not defined!"))
-    (if (= namespace-names namespace-names')
-      (->> namespace-names
-           (map
-            (fn [ns-name]
-              [(ns->path (str package "." ns-name))
-               [ns-name
-                (get-in collection [:namespaces ns-name])
-                (->> (:definitions collection)
-                     (filter
-                      (fn [entry] (string/starts-with? (key entry) (str ns-name "/"))))
-                     (into {}))
-                (or (get-in collection [:procedures ns-name]) [])]]))
-           (filter
-            (fn [pair]
-              (let [[k v] pair]
-                (if (= v (get @files-cache-ref k))
-                  (do false)
-                  (do (swap! files-cache-ref assoc k v) true)))))
-           (map (fn [pair] (let [[k v] pair] [k (generate-file v)])))
-           (into {}))
-      (do
-       (println "Error: namespaces not match!")
-       (println "    from definitions:" (pr-str namespace-names))
-       (println "    from namespaces: " (pr-str namespace-names'))
-       {}))))
