@@ -4,16 +4,16 @@
   :dependencies '[[org.clojure/clojure       "1.8.0"       :scope "test"]
                   [org.clojure/clojurescript "1.9.293"     :scope "test"]
                   [adzerk/boot-test          "1.1.2"       :scope "test"]
+                  [cumulo/shallow-diff       "0.1.1"       :scope "test"]
+                  [fipp                      "0.6.9"       :scope "test"]
+                  [andare                    "0.4.0"       :scope "test"]
                   [cirru/sepal               "0.0.17"]
-                  [andare                    "0.4.0"]
-                  [mvc-works/polyfill        "0.1.1"]
-                  [cumulo/shallow-diff       "0.1.1"]
-                  [fipp                      "0.6.9"]])
+                  [mvc-works/polyfill        "0.1.1"]])
 
 (require '[adzerk.boot-test   :refer :all]
          '[clojure.java.io    :as    io])
 
-(def +version+ "0.1.29")
+(def +version+ "0.1.30")
 
 (task-options!
   pom {:project     'cirru/boot-stack-server
