@@ -5,3 +5,5 @@
 /src/.*
 
 .lumo_cache
+
+node_modules/
