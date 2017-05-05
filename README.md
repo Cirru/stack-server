@@ -9,13 +9,9 @@ Stack Editor Server
 ### Usage
 
 ```bash
-stack-server
-```
-
-or
-
-```bash
-se
+npm i -g stack-editor
+stack-editor
+se # for short
 ```
 
 configure it with:
