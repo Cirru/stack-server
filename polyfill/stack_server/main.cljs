@@ -12,10 +12,16 @@
 (def path (js/require "path"))
 (def mkdirp (js/require "mkdirp"))
 
-(def ir-path (or (get (js->clj js/process.argv) 2) "stack-sepal.ir"))
-(def out-folder (or js/process.env.out "src/"))
-(def extension (or js/process.env.extension ".cljs"))
-(def port (js/parseInt (or js/process.env.port "7010")))
+(enable-console-print!)
+
+(def ir-path
+  (or
+    (get (js->clj js/process.argv) 2)
+    (if (fs.existsSync "ir.edn") "ir.edn")
+    (if (fs.existsSync "stack-sepal.ir") "stack-sepal.ir")
+    (do
+      (println "Missing file: ir.edn or stack-sepal.ir not found!")
+      (.exit js/process 1))))
 
 (def ref-sepal
   (atom
@@ -23,6 +29,10 @@
         (read-string (fs.readFileSync ir-path "utf8"))
         (do (.log js/console (str "Error: " ir-path " does not exist!"))
             (.exit js/process 1)))))
+
+(def extension (or js/process.env.extension (:extension @ref-sepal) ".cljs"))
+(def out-folder (or js/process.env.out (get-in @ref-sepal [:options :src]) "src/"))
+(def port (js/parseInt (or js/process.env.port (get-in @ref-sepal [:options :port]) "7010")))
 
 (defn read-body [req]
   (let [body-ref (atom "")
@@ -96,5 +106,4 @@
     (compile-source! @ref-sepal)
     (create-app!)))
 
-(enable-console-print!)
 (-main)

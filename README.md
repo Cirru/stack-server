@@ -17,12 +17,12 @@ se # for short
 configure it with:
 
 ```bash
-op=watch port=7010 extension=.cljs out=src stack-editor stack-sepal.ir
+op=watch port=7010 extension=.cljs out=src stack-editor ir.edn
 ```
 
 `op` for operation: `watch` or `compile`.
 
-`stack-sepal.ir` is the default filename.
+`ir.edn` is the default filename.
 
 ### License
 
