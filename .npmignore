@@ -1,9 +1,13 @@
 
+/.lumo_cache
 /example
 /polyfill
 /src
 /target/main.out
 /target/stack_server
+/target/META-INF
+/target/*.jar
 /boot.properties
 /build.boot
-/stack-sepal.ir
+/ir.edn
+/yarn.lock
