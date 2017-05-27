@@ -32,7 +32,7 @@ yarn cljs # generate cljs in compiled/
 node entry/bin.js
 ```
 
-```hash
+```bash
 webpack # bundle code to dist/
 ```
 
