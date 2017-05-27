@@ -1,13 +1,43 @@
 {
   "name": "stack-editor",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Server command-line for Stack Editor",
   "bin": {
-    "se": "target/main.js",
-    "stack-editor": "target/main.js"
+    "se": "dist/main.js",
+    "stack-editor": "dist/main.js"
   },
   "scripts": {
+    "cljs": "shadow-cljs --dev",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "shadow-cljs": {
+    "source-paths": [
+      "src",
+      "polyfill"
+    ],
+    "output-dir": "compiled",
+    "dependencies": [
+      [
+        "cumulo/shallow-diff",
+        "0.1.3"
+      ],
+      [
+        "fipp",
+        "0.6.9"
+      ],
+      [
+        "org.clojure/core.async",
+        "0.3.443"
+      ],
+      [
+        "cirru/sepal",
+        "0.0.17"
+      ],
+      [
+        "mvc-works/polyfill",
+        "0.1.1"
+      ]
+    ]
   },
   "repository": {
     "type": "git",
@@ -25,5 +55,9 @@
   "homepage": "https://github.com/Cirru/stack-editor#readme",
   "dependencies": {
     "mkdirp": "^0.5.1"
+  },
+  "devDependencies": {
+    "shadow-cljs": "^0.5.1",
+    "webpack": "^2.6.1"
   }
 }

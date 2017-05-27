@@ -1,9 +1,8 @@
 
+/dist
 /target/
 /.nrepl*
 /src/*.*
 /src/.*
-
-.lumo_cache
 
 node_modules/

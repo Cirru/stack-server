@@ -24,6 +24,18 @@ op=watch port=7010 extension=.cljs out=src stack-editor ir.edn
 
 `ir.edn` is the default filename.
 
+### Develop
+
+```bash
+yarn
+yarn cljs # generate cljs in compiled/
+node entry/bin.js
+```
+
+```hash
+webpack # bundle code to dist/
+```
+
 ### License
 
 MIT

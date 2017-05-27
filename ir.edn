@@ -1,4 +1,5 @@
 {:package "stack-server",
+ :extension ".cljc"
  :options {}
  :files {"analyze" {:ns ["ns"
                          "stack-server.analyze"

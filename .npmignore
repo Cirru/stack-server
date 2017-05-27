@@ -1,13 +1,12 @@
 
-/.lumo_cache
 /example
 /polyfill
 /src
-/target/main.out
-/target/stack_server
-/target/META-INF
-/target/*.jar
+/target/
 /boot.properties
 /build.boot
 /ir.edn
 /yarn.lock
+/entry
+/webpack.*
+/.gitattributes

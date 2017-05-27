@@ -1,10 +1,13 @@
 
 (ns stack-server.main
   (:require        [cljs.reader :refer [read-string]]
+                   [clojure.string :as string]
+                   [clojure.set :refer [difference]]
                    [cljs.core.async :refer [<! >! timeout chan]]
                    [shallow-diff.patch :refer [patch]]
                    [stack-server.analyze :refer [generate-file ns->path]]
-                   [fipp.edn :refer [pprint]])
+                   [fipp.edn :refer [pprint]]
+                   [stack-server.walk :refer [walk]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def fs (js/require "fs"))
@@ -98,7 +101,7 @@
     (println "Port:" port)
     (println "Output:" out-folder)
     (println "Extension:" extension)
-    (println "Version: 0.1.3")
+    (println "Version: 0.2.0")
     (println (str "Edit with http://repo.cirru.org/stack-editor/?port=" port))))
 
 (defn -main []
@@ -106,4 +109,34 @@
     (compile-source! @ref-sepal)
     (create-app!)))
 
+(defn get-entries [sepal-data]
+  (map
+    (fn [ns-part]
+      (string/replace
+        (path.join out-folder
+                   (string/replace (:package @ref-sepal) "." "/")
+                   (str (string/replace ns-part "." "/") extension))
+        "-" "_"))
+    (keys (:files sepal-data))))
+
+(defn check-removed! []
+  (let [*files (atom [])
+        collect! (fn [x] (swap! *files conj x))
+        ns-entries (get-entries @ref-sepal)]
+    (walk out-folder collect!)
+    (println)
+    (let [alive-files (into #{} ns-entries)
+          existing-files (into #{} @*files)
+          removed-files (difference existing-files alive-files)]
+      ; (println "alive-files" alive-files)
+      ; (println "existing-files" existing-files)
+      (doseq [file-path removed-files]
+        (fs.unlinkSync file-path)
+        (println "Redundant file:" file-path)))))
+
 (-main)
+
+(.on js/process "SIGINT"
+  (fn []
+    (if (fs.existsSync out-folder) (check-removed!))
+    (.exit js/process)))
