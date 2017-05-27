@@ -1,2 +1,2 @@
 
-require('shadow-cljs/stack_server.main');
+require('../compiled/stack_server.main');

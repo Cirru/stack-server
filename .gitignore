@@ -4,5 +4,6 @@
 /.nrepl*
 /src/*.*
 /src/.*
+/compiled
 
 node_modules/
