@@ -58,7 +58,7 @@
     "mkdirp": "^0.5.1"
   },
   "devDependencies": {
-    "shadow-cljs": "^0.6.0",
+    "shadow-cljs": "^0.8.0",
     "webpack": "^2.6.1"
   }
 }
