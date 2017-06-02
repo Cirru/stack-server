@@ -1,14 +1,13 @@
 {:package "stack-server",
- :extension ".cljc"
- :options {}
+ :extension ".cljc",
+ :options {},
  :files {"analyze" {:ns ["ns"
                          "stack-server.analyze"
                          [":require"
                           ["[]" "clojure.string" ":as" "string"]
                           ["[]" "cirru.sepal" ":as" "sepal"]
                           ["[]" "polyfill.core" ":as" "polyfill"]]],
-                    :defs {"files-cache-ref" ["def" "files-cache-ref" ["atom" ["{}"]]],
-                           "depends-on?" ["defn"
+                    :defs {"depends-on?" ["defn"
                                           "depends-on?"
                                           ["x" "y" "dict" "level"]
                                           ["if"
@@ -25,13 +24,6 @@
                                                ["fn" ["child"] ["depends-on?" "child" "y" "dict" ["inc" "level"]]]
                                                "deps"]]]]
                                            "false"]],
-                           "ns->path" ["defn"
-                                       "ns->path"
-                                       ["pkg" "ns-part"]
-                                       ["->"
-                                        ["str" "pkg" "|." "ns-part"]
-                                        ["string/replace" ["re-pattern" "|\\."] "|/"]
-                                        ["string/replace" ["re-pattern" "|-"] "|_"]]],
                            "deps-insert" ["defn"
                                           "deps-insert"
                                           ["acc" "new-item" "items" "deps-info"]
@@ -50,16 +42,21 @@
                                                ["into" ["[]"] ["concat" "acc" ["[]" "new-item"] "items"]]]
                                               ["into" ["[]"] ["concat" "acc" ["[]" "new-item"] "items"]]]
                                              ["recur" ["conj" "acc" "cursor"] "new-item" ["rest" "items"] "deps-info"]]]]],
-                           "deps-sort" ["defn"
-                                        "deps-sort"
-                                        ["acc" "items" "deps-info"]
-                                        ["if"
-                                         ["empty?" "items"]
-                                         "acc"
-                                         ["let"
-                                          [["cursor" ["first" "items"]]
-                                           ["next-acc" ["deps-insert" ["[]"] "cursor" "acc" "deps-info"]]]
-                                          ["recur" "next-acc" ["into" ["[]"] ["rest" "items"]] "deps-info"]]]],
+                           "files-cache-ref" ["def" "files-cache-ref" ["atom" ["{}"]]],
+                           "strip-property" ["defn"
+                                             "strip-property"
+                                             ["x"]
+                                             ["if"
+                                              ["string/includes?" "x" "|."]
+                                              ["first" ["string/split" "x" "|."]]
+                                              "x"]],
+                           "ns->path" ["defn"
+                                       "ns->path"
+                                       ["pkg" "ns-part"]
+                                       ["->"
+                                        ["str" "pkg" "|." "ns-part"]
+                                        ["string/replace" ["re-pattern" "|\\."] "|/"]
+                                        ["string/replace" ["re-pattern" "|-"] "|_"]]],
                            "strip-atom" ["defn"
                                          "strip-atom"
                                          ["token"]
@@ -88,6 +85,7 @@
                                                       ["flatten"]
                                                       ["distinct"]
                                                       ["map" "strip-atom"]
+                                                      ["map" "strip-property"]
                                                       ["filter"
                                                        ["fn"
                                                         ["token"]
@@ -123,5 +121,15 @@
                                              ["--" "println" "|after  sort:" "sorted-names"]
                                              ["--" "println" "|generated file:" "code"]
                                              "code"]],
+                           "deps-sort" ["defn"
+                                        "deps-sort"
+                                        ["acc" "items" "deps-info"]
+                                        ["if"
+                                         ["empty?" "items"]
+                                         "acc"
+                                         ["let"
+                                          [["cursor" ["first" "items"]]
+                                           ["next-acc" ["deps-insert" ["[]"] "cursor" "acc" "deps-info"]]]
+                                          ["recur" "next-acc" ["into" ["[]"] ["rest" "items"]] "deps-info"]]]],
                            "def-names" ["def" "def-names" ["#{}" "|def" "|defonce"]]},
                     :procs []}}}
