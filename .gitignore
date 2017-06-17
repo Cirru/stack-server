@@ -1,9 +1,4 @@
 
-/dist
-/target/
-/.nrepl*
-/src/*.*
-/src/.*
-/compiled
-
+dist/
+target/
 node_modules/

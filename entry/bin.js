@@ -1,2 +1,2 @@
 
-require('../compiled/stack_server.main');
+require('../target/stack_server.main');

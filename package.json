@@ -1,44 +1,14 @@
 {
   "name": "stack-editor",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Server command-line for Stack Editor",
   "bin": {
     "se": "dist/main.js",
     "stack-editor": "dist/main.js"
   },
   "scripts": {
-    "cljs-once": "shadow-cljs --once",
-    "cljs": "shadow-cljs --dev",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "shadow-cljs": {
-    "source-paths": [
-      "src",
-      "polyfill"
-    ],
-    "output-dir": "compiled",
-    "dependencies": [
-      [
-        "cumulo/shallow-diff",
-        "0.1.3"
-      ],
-      [
-        "fipp",
-        "0.6.9"
-      ],
-      [
-        "org.clojure/core.async",
-        "0.3.443"
-      ],
-      [
-        "cirru/sepal",
-        "0.0.17"
-      ],
-      [
-        "mvc-works/polyfill",
-        "0.1.1"
-      ]
-    ]
+    "cljs-once": "shadow-cljs -b npm --once",
+    "cljs": "shadow-cljs -b npm --dev"
   },
   "repository": {
     "type": "git",
@@ -58,7 +28,7 @@
     "mkdirp": "^0.5.1"
   },
   "devDependencies": {
-    "shadow-cljs": "^0.8.0",
+    "shadow-cljs": "^0.9.8",
     "webpack": "^2.6.1"
   }
 }
