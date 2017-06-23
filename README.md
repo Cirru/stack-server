@@ -33,6 +33,7 @@ node entry/bin.js
 ```
 
 ```bash
+yarn cljs-once
 webpack # bundle code to dist/
 ```
 
