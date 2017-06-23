@@ -3,10 +3,6 @@
 /polyfill
 /src
 /target/
-/boot.properties
-/build.boot
 /ir.edn
 /yarn.lock
-/entry
-/webpack.*
 /.gitattributes

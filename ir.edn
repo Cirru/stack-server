@@ -1,6 +1,7 @@
 {:package "stack-server",
  :extension ".cljc",
  :options {},
+ :root {:ns "analyze", :def "generate-file"}
  :files {"analyze" {:ns ["ns"
                          "stack-server.analyze"
                          [":require"

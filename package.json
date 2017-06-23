@@ -1,14 +1,14 @@
 {
   "name": "stack-editor",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Server command-line for Stack Editor",
   "bin": {
     "se": "dist/main.js",
     "stack-editor": "dist/main.js"
   },
   "scripts": {
-    "cljs-once": "shadow-cljs -b npm --once",
-    "cljs": "shadow-cljs -b npm --dev"
+    "compile": "shadow-cljs compile script",
+    "watch": "shadow-cljs watch script"
   },
   "repository": {
     "type": "git",
@@ -25,10 +25,10 @@
   },
   "homepage": "https://github.com/Cirru/stack-editor#readme",
   "dependencies": {
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "source-map-support": "^0.4.15"
   },
   "devDependencies": {
-    "shadow-cljs": "^0.9.8",
-    "webpack": "^2.6.1"
+    "shadow-cljs": "^0.14.0"
   }
 }

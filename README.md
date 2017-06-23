@@ -28,13 +28,8 @@ op=watch port=7010 extension=.cljs out=src stack-editor ir.edn
 
 ```bash
 yarn
-yarn cljs # generate cljs in compiled/
-node entry/bin.js
-```
-
-```bash
-yarn cljs-once
-webpack # bundle code to dist/
+yarn compile
+./bin/index.js
 ```
 
 ### License

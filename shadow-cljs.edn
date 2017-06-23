@@ -5,5 +5,7 @@
                 [org.clojure/core.async "0.3.443"]
                 [cirru/sepal "0.0.18"]
                 [mvc-works/polyfill "0.1.1"]]
- :builds {:npm {:target :npm-module
-                :output-dir "target/"}}}
+ :builds {:script {:target :node-script
+                   :main stack-server.main/main!
+                   :output-to "dist/main.js"
+                   :devtools {:after-load stack-server.main/reload!}}}}

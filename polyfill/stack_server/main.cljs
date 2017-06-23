@@ -101,10 +101,10 @@
     (println "Port:" port)
     (println "Output:" out-folder)
     (println "Extension:" extension)
-    (println "Version: 0.2.3")
+    (println "Version: 0.2.4")
     (println (str "Edit with http://stack-editor.cirru.org/?port=" port))))
 
-(defn -main []
+(defn main! []
   (if (= js/process.env.op "compile")
     (compile-source! @ref-sepal)
     (create-app!)))
@@ -134,9 +134,10 @@
         (fs.unlinkSync file-path)
         (println "Redundant file:" file-path)))))
 
-(-main)
-
 (.on js/process "SIGINT"
   (fn []
     (if (fs.existsSync out-folder) (check-removed!))
     (.exit js/process)))
+
+(defn reload! []
+  (println "reload! not implemented!"))
