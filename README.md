@@ -32,6 +32,12 @@ yarn compile
 ./bin/index.js
 ```
 
+Release
+
+```bash
+yarn release
+```
+
 ### License
 
 MIT

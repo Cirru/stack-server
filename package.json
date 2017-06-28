@@ -1,6 +1,6 @@
 {
   "name": "stack-editor",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Server command-line for Stack Editor",
   "bin": {
     "se": "dist/main.js",
@@ -8,6 +8,7 @@
   },
   "scripts": {
     "compile": "shadow-cljs compile script",
+    "release": "shadow-cljs release script",
     "watch": "shadow-cljs watch script"
   },
   "repository": {
