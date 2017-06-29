@@ -1,6 +1,6 @@
 {
   "name": "stack-editor",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Server command-line for Stack Editor",
   "bin": {
     "se": "dist/main.js",
@@ -30,6 +30,6 @@
     "source-map-support": "^0.4.15"
   },
   "devDependencies": {
-    "shadow-cljs": "^0.18.0"
+    "shadow-cljs": "^0.18.1"
   }
 }
