@@ -32,10 +32,10 @@ yarn compile
 ./bin/index.js
 ```
 
-Release
+Release:
 
 ```bash
-yarn release
+yarn build
 ```
 
 ### License
