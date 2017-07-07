@@ -43,10 +43,10 @@
     (let [cursor (first items), next-acc (deps-insert [] cursor acc deps-info)]
       (recur next-acc (into [] (rest items)) deps-info))))
 
-(defn generate-file [ns-name file-info]
+(defn generate-file [file-info]
   (let [ns-line (:ns file-info)
         definitions (:defs file-info)
-        procs (:procs file-info)
+        proc (or (:proc file-info) (:procs file-info))
         var-names (into #{} (keys definitions))
         deps-info (->> definitions
                        (map
@@ -72,7 +72,7 @@
                           (map (fn [var-name] ["declare" var-name]))
                           (into []))
         definition-lines (map (fn [var-name] (get definitions var-name)) sorted-names)
-        tree (into [] (concat [ns-line] declarations definition-lines procs))
+        tree (into [] (concat [ns-line] declarations definition-lines proc))
         code (sepal/make-code tree)]
     (comment println "before sort:" var-names)
     (comment println "after  sort:" sorted-names)

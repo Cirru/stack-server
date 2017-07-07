@@ -24,6 +24,19 @@ op=watch port=7010 extension=.cljs out=src stack-editor ir.edn
 
 `ir.edn` is the default filename.
 
+### Library
+
+[![Clojars Project](https://img.shields.io/clojars/v/cirru/stack-server.svg)](https://clojars.org/cirru/stack-server)
+
+```edn
+[cirru/stack-server "0.2.7"]
+```
+
+```clojure
+(stack-server.analyze/generate file-info)
+; file-info {:ns [] :defs {} :proc []}
+```
+
 ### Develop
 
 ```bash

@@ -1,7 +1,7 @@
 {:package "stack-server",
  :extension ".cljc",
  :options {},
- :root {:ns "analyze", :def "generate-file"}
+ :root {:ns "analyze", :def "generate-file"},
  :files {"analyze" {:ns ["ns"
                          "stack-server.analyze"
                          [":require"
@@ -64,11 +64,11 @@
                                          ["if" ["string/starts-with?" "token" "|@"] ["subs" "token" "1"] "token"]],
                            "generate-file" ["defn"
                                             "generate-file"
-                                            ["ns-name" "file-info"]
+                                            ["file-info"]
                                             ["let"
                                              [["ns-line" [":ns" "file-info"]]
                                               ["definitions" [":defs" "file-info"]]
-                                              ["procs" [":procs" "file-info"]]
+                                              ["proc" ["or" [":proc" "file-info"] [":procs" "file-info"]]]
                                               ["var-names" ["into" ["#{}"] ["keys" "definitions"]]]
                                               ["deps-info"
                                                ["->>"
@@ -116,7 +116,7 @@
                                               ["tree"
                                                ["into"
                                                 ["[]"]
-                                                ["concat" ["[]" "ns-line"] "declarations" "definition-lines" "procs"]]]
+                                                ["concat" ["[]" "ns-line"] "declarations" "definition-lines" "proc"]]]
                                               ["code" ["sepal/make-code" "tree"]]]
                                              ["--" "println" "|before sort:" "var-names"]
                                              ["--" "println" "|after  sort:" "sorted-names"]

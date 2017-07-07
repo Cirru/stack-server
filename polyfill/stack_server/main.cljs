@@ -15,8 +15,6 @@
 (def path (js/require "path"))
 (def mkdirp (js/require "mkdirp"))
 
-(enable-console-print!)
-
 (def ir-path
   (or
     (get (js->clj js/process.argv) 2)
@@ -49,7 +47,7 @@
 
 (defn write-by-file [pkg ns-part file-info]
   (let [file-name (str (ns->path pkg ns-part) extension)
-        content (generate-file ns-part file-info)
+        content (generate-file file-info)
         file-target (path.join out-folder file-name)
         container (path.dirname file-target)]
     (println "File compiled:" file-name)
