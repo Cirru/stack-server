@@ -1,9 +1,10 @@
 
 (set-env!
   :resource-paths #{"src/" "polyfill/"}
-  :dependencies '[])
+  :dependencies '[[cirru/sepal "0.0.18"]
+                  [mvc-works/polyfill "0.1.1"]])
 
-(def +version+ "0.2.7")
+(def +version+ "0.2.8")
 
 (deftask build []
   (comp
