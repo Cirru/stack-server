@@ -1,6 +1,6 @@
 {
   "name": "stack-editor",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Server command-line for Stack Editor",
   "bin": {
     "se": "dist/main.js",
