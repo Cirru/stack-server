@@ -99,7 +99,7 @@
     (println "Port:" port)
     (println "Output:" out-folder)
     (println "Extension:" extension)
-    (println "Version: 0.2.8")
+    (println "Version: 0.2.9")
     (println (str "Edit with http://stack-editor.cirru.org/?port=" port))))
 
 (defn main! []
