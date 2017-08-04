@@ -4,7 +4,7 @@
   :dependencies '[[cirru/sepal "0.0.18"]
                   [mvc-works/polyfill "0.1.1"]])
 
-(def +version+ "0.2.9")
+(def +version+ "0.2.10")
 
 (deftask build []
   (comp

@@ -29,7 +29,7 @@ op=watch port=7010 extension=.cljs out=src stack-editor ir.edn
 [![Clojars Project](https://img.shields.io/clojars/v/cirru/stack-server.svg)](https://clojars.org/cirru/stack-server)
 
 ```edn
-[cirru/stack-server "0.2.9"]
+[cirru/stack-server "0.2.10"]
 ```
 
 ```clojure
