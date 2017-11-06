@@ -1,11 +1,15 @@
 {:package "demo",
- :root {:ns "main", :def "main"}
+ :root {:ns "main", :def "main"},
  :files {"core" {:ns ["ns" "demo.core"],
                  :defs {"main" ["defn"
                                 "main"
                                 []
-                                ["let" [["a" "1"] ["b" "2"] ["c" "3"]] ["println" ["#{}" "1" "2" "3"]]]
-                                ["println" ["#{}" "1" "2" "3"]]
+                                ["let"
+                                 [["a" "1"] ["b" "2"] ["c" "3"]]
+                                 ["println" ["#{}" "1" "2" "3"]]
+                                 ["println" ["#()" "println" "%1"]]
+                                 [";;" "pl"]
+                                 ["loop" [["a" "1"]]]]
                                 ["println" ["#{}" "1" "2" "3"]]
                                 ["println" ["#{}" "1" "2" "3"]]]},
                  :procs []}}}

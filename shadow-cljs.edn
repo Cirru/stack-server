@@ -1,9 +1,9 @@
 
 {:source-paths ["src" "polyfill"]
  :dependencies [[cumulo/shallow-diff "0.1.3"]
-                [fipp "0.6.9"]
+                [fipp "0.6.10"]
                 [org.clojure/core.async "0.3.443"]
-                [cirru/sepal "0.0.20"]
+                [cirru/sepal "0.1.0"]
                 [mvc-works/polyfill "0.1.1"]]
  :builds {:script {:target :node-script
                    :main stack-server.main/main!
