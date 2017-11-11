@@ -4,13 +4,13 @@
 
 (set-env!
   :resource-paths #{"src/" "polyfill"}
-  :dependencies '[[cirru/sepal        "0.1.0"]
+  :dependencies '[[cirru/sepal        "0.1.2"]
                   [mvc-works/polyfill "0.1.1"]]
   :repositories #(conj % ["clojars" {:url "https://clojars.org/repo/"
                                      :username "jiyinyiyong"
                                      :password (read-password "Clojars password: ")}]))
 
-(def +version+ "0.3.0")
+(def +version+ "0.3.1")
 
 (deftask deploy []
   (comp
